@@ -34,7 +34,7 @@ class SettingsSearchSection<T>(
  *
  * @param query The query, already trimmed and non-blank.
  */
-fun Preference.matchesSearch(query: String) =
+internal fun Preference.matchesSearch(query: String) =
     title?.contains(query, ignoreCase = true) == true || summary?.contains(query, ignoreCase = true) == true
 
 /**
@@ -103,14 +103,14 @@ class SettingsSearchFilter<T>(private val sections: List<SettingsSearchSection<T
      */
     private val PreferenceGroup.leaves: List<Preference>
         get() = buildList {
-        for (i in 0 until preferenceCount) {
-            val child = getPreference(i)
+            for (i in 0 until preferenceCount) {
+                val child = getPreference(i)
 
-            if (child is PreferenceGroup) {
-                addAll(child.leaves)
-            } else {
-                add(child)
+                if (child is PreferenceGroup) {
+                    addAll(child.leaves)
+                } else {
+                    add(child)
+                }
             }
         }
-    }
 }

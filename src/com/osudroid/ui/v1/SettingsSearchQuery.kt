@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 /**
  * The default timeout for settings search debounce.
  */
-const val SEARCH_DEBOUNCE_MILLIS = 250L
+internal const val SEARCH_DEBOUNCE_MILLIS = 250L
 
 /**
  * Debounces settings search text. Blank text is emitted immediately so clearing the search restores the full list

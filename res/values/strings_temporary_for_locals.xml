@@ -16,7 +16,7 @@
     <string name="opt_shake_intensity_title">Notelock shake intensity</string>
     <string name="opt_shake_intensity_summary">How strongly hit objects shake when tapped before they can be hit. 0 disables the animation</string>
 
-    <string name="settings_search_hint">Search settings...</string>
+    <string name="settings_search_hint">Search settings</string>
     <string name="settings_search_no_results">No settings found</string>
 
     <string-array name="frame_limiter_names">

@@ -768,6 +768,11 @@ public class Config {
     public static void loadSkins() {
         File[] folders = FileUtils.listFiles(new File(skinTopPath), file -> file.isDirectory() && !file.getName().startsWith("."));
         skins = new HashMap<>();
+
+        if (folders == null) {
+            folders = new File[0];
+        }
+
         for(File folder : folders) {
             skins.put(folder.getName(), folder.getPath());
             Debug.i("skins: " + folder.getName() + " - " + folder.getPath());

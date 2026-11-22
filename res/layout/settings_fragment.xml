@@ -52,7 +52,7 @@
                     android:drawableStart="@drawable/search_24px"
                     android:drawableTint="#FFF"
                     android:hint="@string/settings_search_hint"
-                    android:imeOptions="actionSearch"
+                    android:imeOptions="actionSearch|flagNoExtractUi"
                     android:importantForAutofill="no"
                     android:inputType="text"
                     android:maxLines="1"

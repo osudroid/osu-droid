@@ -118,6 +118,22 @@ class SettingsFragment : SettingsFragment() {
      */
     private var searchFilter: SettingsSearchFilter<Section>? = null
 
+    /**
+     * The [PlayfieldAreaDisplay] of the current view hierarchy, kept so that it is not added to the root container
+     * again every time the gameplay section is bound.
+     */
+    private var playfieldAreaDisplay: PlayfieldAreaDisplay? = null
+
+    /**
+     * Whether this [Section] can currently be bound. The multiplayer sections stay in [availableSections] after the
+     * player leaves the room (e.g. when kicked) while this fragment is still open, but binding them requires a room.
+     */
+    private val Section.isAvailable: Boolean
+        get() = when (this) {
+            Section.Player -> Multiplayer.room != null && Multiplayer.player != null
+            Section.Room -> Multiplayer.room != null
+            else -> true
+        }
 
     private var section = when {
 
@@ -195,6 +211,7 @@ class SettingsFragment : SettingsFragment() {
         isSearching = false
         searchSections = emptyList()
         searchFilter = null
+        playfieldAreaDisplay = null
         currentQuery = ""
         searchQuery.value = ""
 
@@ -300,6 +317,10 @@ class SettingsFragment : SettingsFragment() {
 
 
     private fun selectSection(section: Section) {
+        if (!section.isAvailable) {
+            return
+        }
+
         clearPreferenceFocus()
 
         this.section = section
@@ -359,6 +380,10 @@ class SettingsFragment : SettingsFragment() {
         val sections = ArrayList<SettingsSearchSection<Section>>(availableSections.size)
 
         for (section in availableSections) {
+            if (!section.isAvailable) {
+                continue
+            }
+
             val header = SectionHeaderPreference(context).apply {
                 title = section.title
                 key = "search_header_${section.name}"
@@ -372,7 +397,12 @@ class SettingsFragment : SettingsFragment() {
             preferenceManager.inflateFromResource(context, section.xml, screen)
 
             val categories = (firstCategoryIndex until screen.preferenceCount)
-                .map { screen.getPreference(it) as PreferenceGroup }
+                .map {
+                    val preference = screen.getPreference(it)
+
+                    preference as? PreferenceGroup
+                        ?: error("Top-level preference '${preference.key}' in ${section.name} must be a PreferenceCategory")
+                }
 
             sections.add(SettingsSearchSection(section, header, categories))
         }
@@ -454,6 +484,12 @@ class SettingsFragment : SettingsFragment() {
     override fun onBindPreferences() {
         if (!isSearching) {
             bindSection(section)
+            return
+        }
+
+        // Binding again would rebuild the filter from a screen whose filtered-out rows are already hidden.
+        searchFilter?.let {
+            showSearchResults(it.apply(currentQuery))
             return
         }
 
@@ -680,7 +716,7 @@ class SettingsFragment : SettingsFragment() {
 
 
     private fun handleGameplaySectionPreferences() {
-        val playfieldAreaDisplay = PlayfieldAreaDisplay()
+        val playfieldAreaDisplay = playfieldAreaDisplay ?: PlayfieldAreaDisplay().also { playfieldAreaDisplay = it }
 
         findPreference<SeekBarPreference>("playfieldSize")!!.apply {
             updatesContinuously = true
