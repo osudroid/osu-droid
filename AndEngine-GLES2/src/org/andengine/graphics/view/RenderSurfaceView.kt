@@ -57,12 +57,26 @@ open class RenderSurfaceView : SurfaceView, SurfaceHolder.Callback2 {
         PerformanceHints.PlatformSessionFactory(context),
         // The update thread is never restarted, so its id stays valid for the engine's lifetime.
         IntSupplier { engine?.updateThreadId ?: 0 },
-        LongSupplier { engine?.lastUpdateNanos ?: 0L }
+        // Read on the render thread right after its frame, which is where the engine keeps it valid.
+        LongSupplier { engine?.frameUpdateWorkNanos ?: 0L }
     )
 
-    /** The refresh rate of the display, in Hz, which every frame's work should fit into. See [PerformanceHints]. */
+    /**
+     * The rate the render loop runs at, in Hz, which every frame's work should fit into.
+     *
+     * @see [PerformanceHints.setTargetFrameRate].
+     */
     fun setTargetFrameRate(rate: Float) {
         performanceHints.setTargetFrameRate(rate)
+    }
+
+    /**
+     * Whether the work of each frame is reported to the system.
+     *
+     * @see [PerformanceHints.enabled].
+     */
+    fun setPerformanceHintsEnabled(enabled: Boolean) {
+        performanceHints.enabled = enabled
     }
 
     private var renderer: GlesEngineRenderer? = null

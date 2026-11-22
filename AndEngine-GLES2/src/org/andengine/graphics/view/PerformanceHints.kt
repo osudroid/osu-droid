@@ -13,14 +13,16 @@ import org.andengine.util.debug.Debug
  * render and update threads before frames miss their deadline instead of after. Does nothing below API 31 or when
  * the system declines a session. A session whose calls fail is dropped, so hints can never stop rendering.
  *
- * The reported work is the longer of the render thread's CPU time and the last update tick: the session covers
- * both threads, and a frame is late when either of them is. The render thread's CPU time is used rather than its
- * wall time, since waiting for the GPU or the display is not work the CPU clocks can shorten.
+ * The reported work is the render thread's CPU time plus the CPU time of the update tick the frame was drawn
+ * for. The session covers both threads, and they never run at the same time: the draw waits for its update and the
+ * next update waits for the draw, so a frame takes the time of both. CPU time is used rather than wall time, since
+ * sleeping or waiting for the GPU or the display is not work the CPU clocks can shorten.
  *
- * [setTargetFrameRate] may be called from any thread; every other method is called on the render thread.
+ * [setTargetFrameRate] and [enabled] may be used from any thread; every other method is called on the render thread.
  *
  * @param updateThreadId The thread id of the update thread, or 0 while it is not known yet.
- * @param updateNanos The duration of the last update tick, in nanoseconds, or 0 while there was none.
+ * @param updateNanos The CPU time of the update tick the reported frame was drawn for, in nanoseconds, or 0 if
+ * there was none.
  */
 class PerformanceHints(
     private val factory: SessionFactory,
@@ -41,6 +43,13 @@ class PerformanceHints(
         fun createSession(threadIds: IntArray, targetNanos: Long): Session?
     }
 
+    /**
+     * Whether frames are reported. When turned off, the session is closed on the next frame, so the system goes
+     * back to its default CPU clock policy. Turning it back on requests a new session.
+     */
+    @Volatile
+    var enabled = true
+
     @Volatile
     private var targetNanos = DEFAULT_TARGET_NANOS
 
@@ -53,7 +62,10 @@ class PerformanceHints(
     private var requestedRenderThreadId = 0
     private var requestedUpdateThreadId = 0
 
-    /** Sets the work duration every frame should stay within to one refresh period. Ignores rates that are not positive. */
+    /**
+     * Sets the work duration every frame should stay within to one period of [rate], the rate the render loop runs
+     * at. Ignores rates that are not positive.
+     */
     fun setTargetFrameRate(rate: Float) {
         if (rate > 0f) {
             targetNanos = (NANOS_PER_SECOND / rate).toLong()
@@ -74,6 +86,11 @@ class PerformanceHints(
 
     override fun onFrameWork(workNanos: Long) {
         if (sdkInt < Build.VERSION_CODES.S || renderThreadId == 0) {
+            return
+        }
+
+        if (!enabled) {
+            closeSession()
             return
         }
 
@@ -103,7 +120,7 @@ class PerformanceHints(
                 session.updateTargetWorkDuration(target)
             }
 
-            val frameNanos = maxOf(workNanos, updateNanos.asLong)
+            val frameNanos = workNanos + updateNanos.asLong
             if (frameNanos > 0L) {
                 session.reportActualWorkDuration(frameNanos)
             }

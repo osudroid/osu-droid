@@ -32,10 +32,14 @@ class FrameLimiterSettingTest {
         presentationTime: Boolean,
         choreographer: Boolean,
         releaseAfterSwap: Boolean,
-        maximumUpdateHz: Float
+        maximumUpdateHz: Float,
+        frameRate: Float,
+        performanceHints: Boolean
     ) {
         assertEquals(
-            FrameLimiterMode(vsync, presentationTime, choreographer, releaseAfterSwap, maximumUpdateHz),
+            FrameLimiterMode(
+                vsync, presentationTime, choreographer, releaseAfterSwap, maximumUpdateHz, frameRate, performanceHints
+            ),
             FrameLimiterMode.of(frameLimiter, refreshRate)
         )
     }
@@ -56,33 +60,39 @@ class FrameLimiterSettingTest {
 
     @Test
     fun vsync_at60Hz() {
-        assertMode(1, 60f, vsync = true, presentationTime = false, choreographer = false, releaseAfterSwap = false, maximumUpdateHz = 1000f)
+        assertMode(1, 60f, vsync = true, presentationTime = false, choreographer = false, releaseAfterSwap = false, maximumUpdateHz = 1000f, frameRate = 60f, performanceHints = true)
     }
 
     @Test
     fun vsyncLowLatency_at120Hz() {
-        assertMode(-1, 120f, vsync = true, presentationTime = true, choreographer = true, releaseAfterSwap = true, maximumUpdateHz = 1000f)
+        assertMode(-1, 120f, vsync = true, presentationTime = true, choreographer = true, releaseAfterSwap = true, maximumUpdateHz = 1000f, frameRate = 120f, performanceHints = false)
     }
 
     @Test
     fun twiceRefreshRate_at60Hz() {
-        assertMode(2, 60f, vsync = false, presentationTime = true, choreographer = false, releaseAfterSwap = false, maximumUpdateHz = 120f)
+        assertMode(2, 60f, vsync = false, presentationTime = true, choreographer = false, releaseAfterSwap = false, maximumUpdateHz = 120f, frameRate = 120f, performanceHints = true)
     }
 
     @Test
     fun eightTimesRefreshRate_at144Hz_isCappedByTheHardLimit() {
-        assertMode(8, 144f, vsync = false, presentationTime = true, choreographer = false, releaseAfterSwap = false, maximumUpdateHz = 1000f)
+        assertMode(8, 144f, vsync = false, presentationTime = true, choreographer = false, releaseAfterSwap = false, maximumUpdateHz = 1000f, frameRate = 1000f, performanceHints = true)
     }
 
     @Test
     fun unlimited() {
-        assertMode(0, 60f, vsync = false, presentationTime = true, choreographer = false, releaseAfterSwap = false, maximumUpdateHz = 1000f)
+        assertMode(0, 60f, vsync = false, presentationTime = true, choreographer = false, releaseAfterSwap = false, maximumUpdateHz = 1000f, frameRate = 1000f, performanceHints = true)
     }
 
     @Test
     fun frameLimiter_refreshRateChange_updatesLimit() {
         assertEquals(240f, FrameLimiterMode.of(4, 60f).maximumUpdateHz)
         assertEquals(480f, FrameLimiterMode.of(4, 120f).maximumUpdateHz)
+    }
+
+    @Test
+    fun vsync_refreshRateChange_updatesFrameRate() {
+        assertEquals(60f, FrameLimiterMode.of(1, 60f).frameRate)
+        assertEquals(120f, FrameLimiterMode.of(1, 120f).frameRate)
     }
 
     @Test
