@@ -56,6 +56,7 @@ public class Config {
         animateComboText,
         snakingInSliders,
         snakingOutSliders,
+        animateReverseArrows,
         playMusicPreview,
         showCursor,
         enableExtension,
@@ -196,6 +197,7 @@ public class Config {
         animateComboText = prefs.getBoolean("animateComboText", true);
         snakingInSliders = prefs.getBoolean("snakingInSliders", true);
         snakingOutSliders = prefs.getBoolean("snakingOutSliders", true);
+        animateReverseArrows = prefs.getBoolean("animateReverseArrows", true);
 
         try {
             offset = prefs.getInt("offset", 0);
@@ -519,6 +521,10 @@ public class Config {
 
     public static boolean isSnakingOutSliders() {
         return snakingOutSliders;
+    }
+
+    public static boolean isAnimateReverseArrows() {
+        return animateReverseArrows;
     }
 
     public static boolean isPlayMusicPreview() {
