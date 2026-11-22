@@ -4,8 +4,8 @@ import android.os.Build
 import android.os.SystemClock
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
-import android.security.keystore.StrongBoxUnavailableException
 import android.util.Base64
+import androidx.annotation.VisibleForTesting
 import java.nio.charset.StandardCharsets
 import java.security.KeyPairGenerator
 import java.security.KeyStore
@@ -16,7 +16,8 @@ import java.security.spec.ECGenParameterSpec
 /**
  * Handles hardware-backed key generation and payload signing for online attestation.
  *
- * This uses StrongBox for key generation where available and falls back to TEE-backed keys.
+ * This uses StrongBox for key generation where available and falls back to TEE-backed
+ * keys when StrongBox is missing or fails.
  */
 object HardwareAttestationManager {
     private const val KEYSTORE_PROVIDER = "AndroidKeyStore"
@@ -42,31 +43,66 @@ object HardwareAttestationManager {
     }
 
     private fun generateKeyPairInternal(challenge: ByteArray) {
-        val generator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, KEYSTORE_PROVIDER)
+        generateWithStrongBoxFallback(
+            strongBoxSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P,
+            generate = { useStrongBox -> generateKey(challenge, useStrongBox) },
+            discardFailedKey = ::deleteKey
+        )
 
+        AttestationState.keyGeneratedAt = System.currentTimeMillis()
+    }
+
+    private fun generateKey(challenge: ByteArray, useStrongBox: Boolean) {
         val specBuilder = KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_SIGN)
             .setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
             .setDigests(KeyProperties.DIGEST_SHA256)
             .setAttestationChallenge(challenge)
 
-        // Use StrongBox if available. Otherwise, fall back to TEE.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            try {
-                specBuilder.setIsStrongBoxBacked(true)
-
-                generator.initialize(specBuilder.build())
-                generator.generateKeyPair()
-                AttestationState.keyGeneratedAt = System.currentTimeMillis()
-
-                return
-            } catch (_: StrongBoxUnavailableException) {
-                specBuilder.setIsStrongBoxBacked(false)
-            }
+        if (useStrongBox && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            specBuilder.setIsStrongBoxBacked(true)
         }
+
+        val generator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, KEYSTORE_PROVIDER)
 
         generator.initialize(specBuilder.build())
         generator.generateKeyPair()
-        AttestationState.keyGeneratedAt = System.currentTimeMillis()
+    }
+
+    /**
+     * Generates a key in StrongBox when [strongBoxSupported], and falls back to TEE if that fails for any reason.
+     *
+     * @param strongBoxSupported Whether the OS supports requesting StrongBox at all.
+     * @param generate Generates the key, in StrongBox if its argument is `true`, otherwise in TEE.
+     * @param discardFailedKey Removes whatever a failed StrongBox attempt may have left behind.
+     * @throws Exception The TEE failure, with the StrongBox failure (if any) added as suppressed.
+     */
+    @VisibleForTesting
+    @Throws(Exception::class)
+    internal fun generateWithStrongBoxFallback(
+        strongBoxSupported: Boolean,
+        generate: (useStrongBox: Boolean) -> Unit,
+        discardFailedKey: () -> Unit
+    ) {
+        if (!strongBoxSupported) {
+            generate(false)
+            return
+        }
+
+        try {
+            generate(true)
+        } catch (strongBoxError: Exception) {
+            // We catch everything here, not just StrongBoxUnavailableException.
+            // A StrongBox that exists but cannot attest throws ProviderException instead (e.g. ATTESTATION_KEYS_NOT_PROVISIONED,
+            // UNIMPLEMENTED without an attestation key, or failing to fetch remotely provisioned keys). TEE attestation is equally valid.
+            discardFailedKey()
+
+            try {
+                generate(false)
+            } catch (teeError: Exception) {
+                teeError.addSuppressed(strongBoxError)
+                throw teeError
+            }
+        }
     }
 
     /**
