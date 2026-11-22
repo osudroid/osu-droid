@@ -171,6 +171,8 @@ final class ChoreographerVSyncWaiter {
 		private final Runnable mPostFrameCallback = () -> {
 			// Read here rather than passed along with each post, which needs no allocation per request, and a post
 			// still queued behind a newer request covers that one as well.
+			// This must be set on mThread, otherwise a late frame callback could report a request whose own frame
+			// callback has not been posted yet, and end the wait for that request early.
 			ChoreographerVSyncSource.this.mPostedRequest = ChoreographerVSyncSource.this.mLatestRequest;
 
 			// Runs on mThread, so this is that thread's Choreographer and the callback fires on it.
