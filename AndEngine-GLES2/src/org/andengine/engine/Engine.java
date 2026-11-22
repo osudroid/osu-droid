@@ -147,8 +147,20 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 	protected int mSurfaceWidth = 1; // 1 to prevent accidental DIV/0
 	private volatile boolean mIsLagging;
-	// Written by the update thread, read by the render thread for its performance hints.
-	private volatile long mLastUpdateNanos;
+	// BEGIN osu!droid modified - report the update work of each drawn frame
+	/**
+	 * The thread CPU time of the last update tick, in nanoseconds.
+	 * <p>
+	 * Guarded by {@link #mEngineLock}.
+	 */
+	private long mLastUpdateWorkNanos;
+	/**
+	 * The thread CPU time of the update tick the last drawn frame was drawn for, in nanoseconds.
+	 * <p>
+	 * Only accessed on the thread that calls {@link #onDrawFrame(DrawContext)}.
+	 */
+	private long mFrameUpdateWorkNanos;
+	// END osu!droid modified
 	protected int mSurfaceHeight = 1; // 1 to prevent accidental DIV/0
 
 	// ===========================================================
@@ -207,10 +219,26 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 		return this.mUpdateThread.getThreadId();
 	}
 
-	/** @return The wall time of the last update tick, in nanoseconds, or 0 before the first tick. */
-	public long getLastUpdateNanos() {
-		return this.mLastUpdateNanos;
+	// BEGIN osu!droid modified - report the update work of each drawn frame
+	/**
+	 * @return The thread CPU time of the update tick the last drawn frame was drawn for, in nanoseconds, or 0 if no
+	 * tick ran for it or the platform cannot measure it.
+	 * <p>
+	 * Only valid on the thread that calls {@link #onDrawFrame(DrawContext)}, where it stays with its frame even
+	 * while the next tick runs.
+	 */
+	public long getFrameUpdateWorkNanos() {
+		return this.mFrameUpdateWorkNanos;
 	}
+
+	/**
+	 * @return The CPU time of the calling thread, in nanoseconds, or a negative value if the platform cannot
+	 * measure it.
+	 */
+	protected long currentThreadCpuTimeNanos() {
+		return android.os.Debug.threadCpuTimeNanos();
+	}
+	// END osu!droid modified
 
 	public void startUpdateThread() throws IllegalThreadStateException {
 		this.mUpdateThread.start();
@@ -590,9 +618,15 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 				this.throwOnDestroyed();
 
 				final long updateStart = System.nanoTime();
+				// BEGIN osu!droid modified - report the update work of each drawn frame for performance hints
+				final long workStart = this.currentThreadCpuTimeNanos();
 				this.onUpdate(secondsElapsed);
+				final long workEnd = this.currentThreadCpuTimeNanos();
+				// CPU time, so that sleeping in onUpdate(), such as when the update clock throttles, is not counted as
+				// work. Reported as 0 when the platform cannot measure it.
+				this.mLastUpdateWorkNanos = workStart < 0 || workEnd < workStart ? 0 : workEnd - workStart;
+				// END osu!droid modified
 				final long updateNanos = System.nanoTime() - updateStart;
-				this.mLastUpdateNanos = updateNanos;
 				RenderStats.onUpdate(updateNanos);
 
 				this.throwOnDestroyed();
@@ -606,6 +640,11 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 			this.mEngineLock.lock();
 			try {
 				this.throwOnDestroyed();
+
+				// BEGIN osu!droid modified - report the update work of each drawn frame for performance hints
+				// No update runs for this frame.
+				this.mLastUpdateWorkNanos = 0;
+				// END osu!droid modified
 
 				this.mEngineLock.notifyCanDraw();
 				this.mEngineLock.waitUntilCanUpdate();
@@ -660,6 +699,11 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 		engineLock.lock();
 		try {
 			engineLock.waitUntilCanDraw();
+			// BEGIN osu!droid modified - report the update work of each drawn frame for performance hints
+			// Taken here, while the next tick cannot run yet. This frame is only reported once it has been presented,
+			// and by then, the next tick may have overwritten mLastUpdateWorkNanos.
+			this.mFrameUpdateWorkNanos = this.mLastUpdateWorkNanos;
+			// END osu!droid modified
 			this.mUpdateReleasePending = false;
 			final boolean releaseAfterSwap = this.mReleaseUpdateAfterSwap;
 			RenderStats.beginDraw();

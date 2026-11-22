@@ -16,7 +16,11 @@ data class FrameLimiterMode(
     /** Whether the next update only starts once the frame has been swapped. */
     val releaseUpdateAfterSwap: Boolean,
     /** The update rate cap of the update clock. */
-    val maximumUpdateHz: Float
+    val maximumUpdateHz: Float,
+    /** The rate the render loop runs at. */
+    val frameRate: Float,
+    /** Whether the work of each frame is reported to the system's performance hint manager. */
+    val performanceHints: Boolean
 ) {
     companion object {
         /**
@@ -32,23 +36,28 @@ data class FrameLimiterMode(
          */
         @JvmStatic
         fun of(frameLimiter: Int, refreshRate: Float): FrameLimiterMode {
-            val lowLatency = frameLimiter == Config.FRAME_LIMITER_VSYNC_LOW_LATENCY
-            val vsync = lowLatency || frameLimiter == Config.FRAME_LIMITER_VSYNC
+            val isLowLatency = frameLimiter == Config.FRAME_LIMITER_VSYNC_LOW_LATENCY
+            val isVsync = isLowLatency || frameLimiter == Config.FRAME_LIMITER_VSYNC
 
             // With vertical sync on, the display paces the loop and the hard limit is never reached. Without it,
             // the clock is the only thing pacing the loop.
             val maximumUpdateHz =
-                if (vsync || frameLimiter == Config.FRAME_LIMITER_UNLIMITED) MAXIMUM_UPDATE_HZ
+                if (isVsync || frameLimiter == Config.FRAME_LIMITER_UNLIMITED) MAXIMUM_UPDATE_HZ
                 else min(refreshRate * frameLimiter, MAXIMUM_UPDATE_HZ)
 
             return FrameLimiterMode(
-                vsync = vsync,
+                vsync = isVsync,
                 // Every mode but plain vertical sync gives each frame a presentation time.
                 presentationTime = frameLimiter != Config.FRAME_LIMITER_VSYNC,
-                choreographerPacing = lowLatency,
+                choreographerPacing = isLowLatency,
                 // The next update only starts after the vsync wait, so it samples input as late as possible.
-                releaseUpdateAfterSwap = lowLatency,
-                maximumUpdateHz = maximumUpdateHz
+                releaseUpdateAfterSwap = isLowLatency,
+                maximumUpdateHz = maximumUpdateHz,
+                frameRate = if (isVsync) refreshRate else maximumUpdateHz,
+                // Performance hints let the system lower the CPU clocks until the work of a frame nearly fills its
+                // period. Low latency VSync wants each frame done as soon as possible after the vertical sync
+                // instead, so it is left to the default CPU clock policy.
+                performanceHints = !isLowLatency
             )
         }
     }

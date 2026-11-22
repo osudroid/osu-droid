@@ -203,24 +203,66 @@ class PerformanceHintsTest {
 
     @Test
     @Config(sdk = [31])
-    fun reportsUpdateTickWhenLongerThanRenderWork() {
+    fun reportsRenderWorkPlusUpdateTick() {
         val factory = FakeFactory()
         val hints = startedHints(factory, updateNanos = LongSupplier { 9_000_000L })
 
         hints.onFrameWork(3_000_000)
 
-        assertEquals(listOf(9_000_000L), factory.sessions.single().reported)
+        assertEquals(listOf(12_000_000L), factory.sessions.single().reported)
     }
 
     @Test
     @Config(sdk = [31])
-    fun reportsRenderWorkWhenLongerThanUpdateTick() {
+    fun reportsUpdateTickAloneWhenRenderWorkIsUnknown() {
         val factory = FakeFactory()
         val hints = startedHints(factory, updateNanos = LongSupplier { 2_000_000L })
 
-        hints.onFrameWork(5_000_000)
+        hints.onFrameWork(0)
 
-        assertEquals(listOf(5_000_000L), factory.sessions.single().reported)
+        assertEquals(listOf(2_000_000L), factory.sessions.single().reported)
+    }
+
+    @Test
+    @Config(sdk = [31])
+    fun disabled_closesSessionAndReportsNothing() {
+        val factory = FakeFactory()
+        val hints = startedHints(factory)
+        hints.onFrameWork(3_000_000)
+
+        hints.enabled = false
+        hints.onFrameWork(3_000_000)
+
+        assertEquals(1, factory.requests)
+        assertTrue(factory.sessions.single().closed)
+        assertEquals(listOf(3_000_000L), factory.sessions.single().reported)
+    }
+
+    @Test
+    @Config(sdk = [31])
+    fun disabledFromTheStart_requestsNoSession() {
+        val factory = FakeFactory()
+        val hints = startedHints(factory).apply { enabled = false }
+
+        hints.onFrameWork(3_000_000)
+
+        assertEquals(0, factory.requests)
+    }
+
+    @Test
+    @Config(sdk = [31])
+    fun reEnabled_createsNewSession() {
+        val factory = FakeFactory()
+        val hints = startedHints(factory)
+        hints.onFrameWork(3_000_000)
+        hints.enabled = false
+        hints.onFrameWork(3_000_000)
+
+        hints.enabled = true
+        hints.onFrameWork(4_000_000)
+
+        assertEquals(2, factory.sessions.size)
+        assertEquals(listOf(4_000_000L), factory.sessions[1].reported)
     }
 
     private companion object {
