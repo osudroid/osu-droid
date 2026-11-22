@@ -28,6 +28,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceManager
+import androidx.preference.PreferenceScreen
 import androidx.preference.SeekBarPreference
 import com.acivev.VibratorManager
 import com.edlplan.framework.easing.Easing
@@ -234,6 +235,10 @@ class SettingsFragment : SettingsFragment() {
 
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) = Unit
+
+
+    @SuppressLint("RestrictedApi")
+    override fun onCreateAdapter(preferenceScreen: PreferenceScreen) = SettingsCardAdapter(preferenceScreen)
 
 
     // For whatever reason this is restricted API when it wasn't in previous SDKs.
