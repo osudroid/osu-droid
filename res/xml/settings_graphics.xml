@@ -118,6 +118,16 @@
             android:title="@string/opt_animate_combo_text_title"
             app:layout="@layout/settings_preference_checkbox" />
 
+        <com.osudroid.ui.EditableSeekBarPreference
+            android:defaultValue="100"
+            android:key="shakeIntensity"
+            android:max="100"
+            android:summary="@string/opt_shake_intensity_summary"
+            android:title="@string/opt_shake_intensity_title"
+            app:min="0"
+            app:showSeekBarValue="true"
+            app:layout="@layout/settings_preference_seekbar" />
+
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="snakingInSliders"
