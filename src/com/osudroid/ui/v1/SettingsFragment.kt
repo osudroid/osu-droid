@@ -469,6 +469,12 @@ class SettingsFragment : SettingsFragment() {
     }
 
 
+    /**
+     * Attaches the preference handlers of [section] to the current screen.
+     *
+     * In search mode this runs for every section on one combined screen, so a preference that is set up from another
+     * section's value (e.g. `player_team` from `room_versus_mode`) must be updated from that value's change listener.
+     */
     private fun bindSection(section: Section) = when (section) {
 
         Section.General -> handleGeneralSectionPreferences()
@@ -608,6 +614,21 @@ class SettingsFragment : SettingsFragment() {
     }
 
 
+    /**
+     * Builds the skin options for the skin picker.
+     */
+    private fun createSkinOptions(): MutableList<Option> {
+        val skinMain = File(Config.getSkinTopPath())
+        val skinMap = Config.getSkins()
+        val skins = skinMap.mapTo(ArrayList(skinMap.size + 1)) { Option(it.key, it.value) }
+
+        skins.sortBy { it.text.toString() }
+        skins.add(0, Option(skinMain.name + " (Default)", skinMain.path))
+
+        return skins
+    }
+
+
     private fun handleGraphicsSectionPreferences() {
         findPreference<SelectPreference>("frameLimiter")!!.setOnPreferenceChangeListener { _, newValue ->
             val frameLimiter = Config.parseFrameLimiter(newValue.toString())
@@ -621,14 +642,7 @@ class SettingsFragment : SettingsFragment() {
 
         findPreference<SelectPreference>("skinPath")!!.apply {
 
-            val skinMain = File(Config.getSkinTopPath())
-            val skinMap = Config.getSkins()
-            val skins = skinMap.mapTo(ArrayList(skinMap.size + 1)) { Option(it.key, it.value) }
-
-            skins.sortBy { it.text.toString() }
-            skins.add(0, Option(skinMain.name + " (Default)", skinMain.path))
-
-            options = skins
+            options = createSkinOptions()
 
             setOnPreferenceChangeListener { _, newValue ->
                 loadSkin(newValue.toString())
@@ -788,6 +802,10 @@ class SettingsFragment : SettingsFragment() {
 
             it.setText(newValue.toString())
             Config.loadConfig(requireActivity())
+
+            // Config.loadConfig() does not rescan skin folders, so the skin list must be reloaded explicitly.
+            Config.loadSkins()
+            findPreference<SelectPreference>("skinPath")?.options = createSkinOptions()
             false
         }
     }
@@ -912,7 +930,10 @@ class SettingsFragment : SettingsFragment() {
             value = Multiplayer.room!!.teamMode.ordinal.toString()
 
             setOnPreferenceChangeListener { _, newValue ->
-                RoomAPI.setRoomTeamMode(TeamMode.entries.getOrNull((newValue as String).toInt()) ?: return@setOnPreferenceChangeListener false)
+                val teamMode = TeamMode.entries.getOrNull((newValue as String).toInt()) ?: return@setOnPreferenceChangeListener false
+
+                findPreference<SelectPreference>("player_team")?.isEnabled = teamMode == TeamMode.TeamVS
+                RoomAPI.setRoomTeamMode(teamMode)
                 true
             }
         }
