@@ -292,9 +292,13 @@ class SongSelectLeaderboard : UILinearContainer() {
 
                     Local -> {
                         ensureActive()
-                        itemModels = DatabaseManager.scoreInfoTable.getBeatmapScores(beatmapInfo.md5).mapIndexed { index, scoreInfo ->
+                        val difficulty = beatmapInfo.getBeatmapDifficulty()
+                        val scoreInfoTable = DatabaseManager.scoreInfoTable
+
+                        scoreInfoTable.migrateScores(beatmapInfo.md5, difficulty)
+                        itemModels = scoreInfoTable.getBeatmapLeaderboard(beatmapInfo.md5, difficulty).mapIndexed { index, scored ->
                             ensureActive()
-                            BeatmapScore(index + 1, scoreInfo)
+                            BeatmapScore(index + 1, scored.scoreInfo, scored.effectiveScore)
                         }
                     }
 

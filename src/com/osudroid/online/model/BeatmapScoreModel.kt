@@ -27,14 +27,14 @@ data class BeatmapScoreModel(
     val isInLeaderboard: Boolean = true,
 )
 
-fun BeatmapScore(rank: Int, info: ScoreInfo): BeatmapScoreModel {
+fun BeatmapScore(rank: Int, info: ScoreInfo, score: Long = info.score): BeatmapScoreModel {
     return BeatmapScoreModel(
         scoreId = info.id,
         rank = rank,
         mark = info.mark,
         playerName = info.playerName,
         mods = info.mods,
-        score = info.score,
+        score = score,
         pp = 0f,
         maxCombo = info.maxCombo,
         accuracy = info.accuracy
