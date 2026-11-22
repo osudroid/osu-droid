@@ -166,7 +166,7 @@ public class OnlineManager {
             PostBuilder post = createLoginPost();
             post.addParam("attestationChain", chain);
 
-            var token = AttestationState.getPendingToken();
+            var token = AttestationState.consumePendingToken();
 
             if (token != null) {
                 post.addParam("attestationToken", token);
@@ -213,7 +213,6 @@ public class OnlineManager {
             bParams.putString(FirebaseAnalytics.Param.METHOD, "ingame");
             GlobalManager.getInstance().getMainActivity().getAnalytics().logEvent(FirebaseAnalytics.Event.LOGIN, bParams);
 
-            AttestationState.setPendingToken(null);
             AttestationState.setSessionAttestationReady(true);
 
             return true;
