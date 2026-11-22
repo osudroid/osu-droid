@@ -499,6 +499,11 @@ fun BeatmapInfo(data: Beatmap, lastModified: Long, calculateDifficulty: Boolean,
     return beatmapInfo
 }
 
+/**
+ * The number of beatmap set directories deleted per statement in [IBeatmapInfoDAO.deleteAllBeatmapSets].
+ */
+private const val DELETE_BEATMAP_SET_CHUNK_SIZE = 500
+
 @Dao interface IBeatmapInfoDAO {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -516,8 +521,29 @@ fun BeatmapInfo(data: Beatmap, lastModified: Long, calculateDifficulty: Boolean,
     @Query("DELETE FROM BeatmapInfo WHERE setDirectory = :directory")
     fun deleteBeatmapSet(directory: String)
 
+    /**
+     * Deletes all beatmaps whose set directory is in [directories].
+     *
+     * The directories are deleted in chunks of [DELETE_BEATMAP_SET_CHUNK_SIZE] inside a transaction.
+     * Room expands the `IN` clause into one bind variable per directory and will cause SQLite to
+     * reject statements if there are too many of them.
+     *
+     * @param directories The set directories to delete.
+     */
+    @Transaction
+    fun deleteAllBeatmapSets(directories: List<String>) {
+        for (chunk in directories.chunked(DELETE_BEATMAP_SET_CHUNK_SIZE)) {
+            deleteBeatmapSetChunk(chunk)
+        }
+    }
+
+    /**
+     * Deletes all beatmaps whose set directory is in [directories].
+     *
+     * Only use this on bounded [List]s. Otherwise, use [deleteAllBeatmapSets] instead.
+     */
     @Query("DELETE FROM BeatmapInfo WHERE setDirectory IN (:directories)")
-    fun deleteAllBeatmapSets(directories: List<String>)
+    fun deleteBeatmapSetChunk(directories: List<String>)
 
     @Transaction
     @Query("SELECT DISTINCT setDirectory, setId FROM BeatmapInfo")
