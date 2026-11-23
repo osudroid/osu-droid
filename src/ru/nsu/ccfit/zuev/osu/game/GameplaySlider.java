@@ -1072,7 +1072,9 @@ public class GameplaySlider extends GameObject {
     }
 
     private void animateEndArrow() {
-        if ((!Config.isSnakingInSliders() && !Config.isSnakingOutSliders()) || beatmapSlider == null || beatmapSlider.getSpanCount() <= 1) {
+        if (!Config.isAnimateReverseArrows() ||
+                (!Config.isSnakingInSliders() && !Config.isSnakingOutSliders()) ||
+                beatmapSlider == null || beatmapSlider.getSpanCount() <= 1) {
             return;
         }
 

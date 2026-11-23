@@ -143,6 +143,13 @@
             app:layout="@layout/settings_preference_checkbox" />
 
         <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="animateReverseArrows"
+            android:summary="@string/opt_animate_reverse_arrows_summary"
+            android:title="@string/opt_animate_reverse_arrows_title"
+            app:layout="@layout/settings_preference_checkbox" />
+
+        <CheckBoxPreference
             android:defaultValue="false"
             android:key="noChangeDimInBreaks"
             android:summary="@string/opt_noChangeDimInBreaks_summary"
