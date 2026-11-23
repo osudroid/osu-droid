@@ -63,6 +63,19 @@ object AttestationState {
     }
 
     /**
+     * Takes the pending token and nullifies it so that it is not reused.
+     *
+     * @return The pending token, or `null` if there is none.
+     */
+    @JvmStatic
+    fun consumePendingToken(): String? {
+        val token = pendingToken
+        pendingToken = null
+
+        return token
+    }
+
+    /**
      * Clears all attestation session fields.
      */
     @JvmStatic

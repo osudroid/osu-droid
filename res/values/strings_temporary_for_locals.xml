@@ -34,6 +34,13 @@
     <string name="opt_category_rendering">Rendering</string>
     <string name="opt_frame_limiter_title">Frame limiter</string>
     <string name="opt_frame_limiter_summary">Disabling VSync lowers visual latency but greatly increases battery usage and heat</string>
+    <string name="opt_shake_intensity_title">Notelock shake intensity</string>
+    <string name="opt_shake_intensity_summary">How strongly hit objects shake when tapped before they can be hit. 0 disables the animation</string>
+    <string name="opt_animate_reverse_arrows_title">Animate slider reverse arrows</string>
+    <string name="opt_animate_reverse_arrows_summary">Pulse slider reverse arrows. Requires snaking in or snaking out sliders</string>
+
+    <string name="settings_search_hint">Search settings</string>
+    <string name="settings_search_no_results">No settings found</string>
     <string name="opt_full_color_depth_title">Full color depth</string>
     <string name="opt_full_color_depth_summary">Renders with 24-bit instead of 16-bit color for smoother gradients, at a slightly higher GPU cost. Takes effect after restarting the game</string>
 

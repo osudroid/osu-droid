@@ -29,6 +29,52 @@
                 android:src="@drawable/arrow_back_24px"
                 app:tint="#FFF" />
 
+            <LinearLayout
+                android:id="@+id/search_bar"
+                android:layout_width="400dp"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:layout_toEndOf="@id/close"
+                android:background="@drawable/rounded_rect"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="12dp">
+
+                <EditText
+                    android:id="@+id/search_input"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:drawablePadding="12dp"
+                    android:drawableStart="@drawable/search_24px"
+                    android:drawableTint="#FFF"
+                    android:hint="@string/settings_search_hint"
+                    android:imeOptions="actionSearch|flagNoExtractUi"
+                    android:importantForAutofill="no"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    android:textColor="#FFF"
+                    android:textColorHint="#FFB2B2CC"
+                    android:textSize="14sp" />
+
+                <ImageButton
+                    style="@style/button_borderless"
+                    android:id="@+id/search_clear"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minHeight="0dp"
+                    android:padding="8dp"
+                    android:src="@drawable/close_24px"
+                    android:visibility="gone"
+                    app:tint="#FFF" />
+
+            </LinearLayout>
+
         </RelativeLayout>
 
         <LinearLayout
@@ -58,7 +104,19 @@
                 android:layout_height="match_parent"
                 android:layout_marginLeft="32dp"
                 android:animateLayoutChanges="false"
-                tools:ignore="NewApi" />
+                tools:ignore="NewApi">
+
+                <TextView
+                    android:id="@+id/search_empty"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="@string/settings_search_no_results"
+                    android:textColor="#FFB2B2CC"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+
+            </FrameLayout>
 
         </LinearLayout>
 
