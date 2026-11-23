@@ -65,7 +65,8 @@ class ChoreographerVsyncSourceTest {
 
     @Test
     fun `Lost frame callback does not stall later waits`() {
-        val waiter = VsyncWaiter(source, timeoutMillis = 300)
+        val timeoutMillis = 300L
+        val waiter = VsyncWaiter(source, timeoutMillis)
         waiter.waitForVsync()
         looper.runPosts()
         looper.loseOldestFrameCallback()
@@ -79,7 +80,8 @@ class ChoreographerVsyncSourceTest {
         waiter.waitForVsync()
         val elapsedMillis = (System.nanoTime() - start) / 1_000_000L
 
-        assertTrue("elapsed $elapsedMillis", elapsedMillis < 150)
+        // A stalled wait lasts at least the whole timeout, as the wait loops until the deadline passes.
+        assertTrue("elapsed $elapsedMillis", elapsedMillis < timeoutMillis)
     }
 
     @Test
