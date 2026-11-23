@@ -14,21 +14,31 @@ import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.DrawableRes
 import androidx.annotation.XmlRes
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.getSystemService
 import androidx.core.os.LocaleListCompat
+import androidx.core.widget.doAfterTextChanged
 import androidx.core.view.forEach
-import androidx.core.view.get
 import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
+import androidx.preference.PreferenceGroup
+import androidx.preference.PreferenceGroupAdapter
 import androidx.preference.PreferenceManager
+import androidx.preference.PreferenceScreen
 import androidx.preference.SeekBarPreference
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.acivev.VibratorManager
 import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.fragment.LoadingFragment
@@ -54,15 +64,15 @@ import com.reco1l.framework.android.cornerRadius
 import com.reco1l.framework.android.dp
 import com.reco1l.framework.android.drawableLeft
 import com.reco1l.framework.android.layoutWidth
-import com.reco1l.framework.android.topMargin
 import com.osudroid.mods.ModAutoplay
 import com.osudroid.replay.ReplayImporter
 import com.osudroid.utils.ModHashMap
-import com.reco1l.framework.android.bottomMargin
 import java.io.File
 import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ConfigBackup
 import ru.nsu.ccfit.zuev.osu.GlobalManager
@@ -81,6 +91,49 @@ class SettingsFragment : SettingsFragment() {
 
     private lateinit var sectionSelector: LinearLayout
 
+    private val availableSections = mutableListOf<Section>()
+
+    private val sectionButtons = mutableMapOf<Section, TextView>()
+
+    private val searchQuery = MutableStateFlow("")
+
+    /**
+     * The trimmed query that was last received from [searchQuery] after debouncing.
+     */
+    private var currentQuery = ""
+
+    private var isSearching = false
+
+    /**
+     * The sections that are combined into the search preference screen. Empty
+     * outside of search mode.
+     */
+    private var searchSections = emptyList<SettingsSearchSection<Section>>()
+
+    /**
+     * The filter of the search preference screen.
+     *
+     * `null` until the preferences have been bound, since the filter must
+     * be created after all bind handlers have run.
+     */
+    private var searchFilter: SettingsSearchFilter<Section>? = null
+
+    /**
+     * The [PlayfieldAreaDisplay] of the current view hierarchy, kept so that it is not added to the root container
+     * again every time the gameplay section is bound.
+     */
+    private var playfieldAreaDisplay: PlayfieldAreaDisplay? = null
+
+    /**
+     * Whether this [Section] can currently be bound. The multiplayer sections stay in [availableSections] after the
+     * player leaves the room (e.g. when kicked) while this fragment is still open, but binding them requires a room.
+     */
+    private val Section.isAvailable: Boolean
+        get() = when (this) {
+            Section.Player -> Multiplayer.room != null && Multiplayer.player != null
+            Section.Room -> Multiplayer.room != null
+            else -> true
+        }
 
     private var section = when {
 
@@ -150,41 +203,17 @@ class SettingsFragment : SettingsFragment() {
 
         sectionSelector = findViewById(R.id.section_selector)!!
         sectionSelector.removeAllViews()
+        sectionSelector.setPadding(0, 32.dp, 0, 32.dp)
 
-        fun createSectionButton(text: String, icon: Int, section: Section) {
+        availableSections.clear()
+        sectionButtons.clear()
 
-            val button = TextView(ContextThemeWrapper(context, R.style.settings_tab_text))
-
-            button.cornerRadius = 15f.dp
-            button.layoutWidth = 200.dp
-            button.text = text
-            button.drawableLeft = requireContext().getDrawable(icon)!!
-            button.drawableLeft!!.setTint(Color.WHITE)
-
-            button.setOnClickListener {
-
-                // Workaround to IllegalStateException being thrown when an EditText is focused
-                // while trying to change section.
-                root!!.findFocus()?.clearFocus()
-
-                sectionSelector.forEach {
-                    it.setBackgroundColor(if (it == button) 0xFF363653.toInt() else Color.TRANSPARENT)
-                }
-
-                this.section = section
-
-                // Older SDKs may potentially throw an IllegalStateException when trying to change
-                // preference screen, so we need to remove all views first to prevent that.
-                listView.removeAllViews()
-                setPreferencesFromResource(section.xml, null)
-            }
-
-            sectionSelector.addView(button)
-
-            if (this.section == section) {
-                button.callOnClick()
-            }
-        }
+        isSearching = false
+        searchSections = emptyList()
+        searchFilter = null
+        playfieldAreaDisplay = null
+        currentQuery = ""
+        searchQuery.value = ""
 
 
         if (Multiplayer.isMultiplayer) {
@@ -198,10 +227,11 @@ class SettingsFragment : SettingsFragment() {
             }
 
             createDivider("Multiplayer")
-            createSectionButton("Player", R.drawable.person_24px, Section.Player)
+            createSectionButton(Section.Player)
 
-            if (Multiplayer.isRoomHost)
-                createSectionButton("Room", R.drawable.groups_24px, Section.Room)
+            if (Multiplayer.isRoomHost) {
+                createSectionButton(Section.Room)
+            }
 
             createDivider("Game")
 
@@ -209,26 +239,235 @@ class SettingsFragment : SettingsFragment() {
 
 
         if (!Multiplayer.isMultiplayer) {
-            createSectionButton("General", R.drawable.grid_view_24px, Section.General)
+            createSectionButton(Section.General)
         }
 
-        createSectionButton("Gameplay", R.drawable.videogame_asset_24px, Section.Gameplay)
-        createSectionButton("Graphics", R.drawable.display_settings_24px, Section.Graphics)
-        createSectionButton("Audio", R.drawable.headphones_24px, Section.Audio)
+        createSectionButton(Section.Gameplay)
+        createSectionButton(Section.Graphics)
+        createSectionButton(Section.Audio)
 
         if (!Multiplayer.isMultiplayer) {
-            createSectionButton("Library", R.drawable.library_music_24px, Section.Library)
+            createSectionButton(Section.Library)
         }
 
-        createSectionButton("Input", R.drawable.trackpad_input_24px, Section.Input)
-        createSectionButton("Advanced", R.drawable.manufacturing_24px, Section.Advanced)
-
-
-        sectionSelector[0].topMargin = 32.dp
-        sectionSelector[sectionSelector.childCount - 1].bottomMargin = 32.dp
+        createSectionButton(Section.Input)
+        createSectionButton(Section.Advanced)
 
         findViewById<View>(R.id.close)!!.setOnClickListener {
             dismiss()
+        }
+
+        val searchInput = findViewById<EditText>(R.id.search_input)!!
+        val searchClear = findViewById<View>(R.id.search_clear)!!
+
+        searchInput.doAfterTextChanged {
+            searchQuery.value = it?.toString().orEmpty()
+            searchClear.visibility = if (it.isNullOrEmpty()) View.GONE else View.VISIBLE
+        }
+
+        searchInput.setOnEditorActionListener { view, actionId, _ ->
+            if (actionId != EditorInfo.IME_ACTION_SEARCH) {
+                return@setOnEditorActionListener false
+            }
+
+            requireContext().getSystemService<InputMethodManager>()?.hideSoftInputFromWindow(view.windowToken, 0)
+            true
+        }
+
+        searchClear.setOnClickListener {
+            searchInput.setText("")
+        }
+    }
+
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            searchQuery.debounceSearchQuery().collect(::onSearchQuery)
+        }
+    }
+
+
+    private fun createSectionButton(section: Section) {
+        val button = TextView(ContextThemeWrapper(context, R.style.settings_tab_text))
+
+        button.cornerRadius = 15f.dp
+        button.layoutWidth = 200.dp
+        button.text = section.title
+        button.drawableLeft = requireContext().getDrawable(section.icon)!!
+        button.drawableLeft!!.setTint(Color.WHITE)
+
+        button.setOnClickListener {
+            if (isSearching) {
+                scrollToSection(section)
+            } else {
+                selectSection(section)
+            }
+        }
+
+        availableSections.add(section)
+        sectionButtons[section] = button
+        sectionSelector.addView(button)
+
+        if (this.section == section) {
+            button.callOnClick()
+        }
+    }
+
+
+    private fun selectSection(section: Section) {
+        if (!section.isAvailable) {
+            return
+        }
+
+        clearPreferenceFocus()
+
+        this.section = section
+        showSectionList(null)
+
+        // Older SDKs may potentially throw an IllegalStateException when trying to change
+        // preference screen, so we need to remove all views first to prevent that.
+        listView.removeAllViews()
+        setPreferencesFromResource(section.xml, null)
+    }
+
+
+    /**
+     * Clears the focus of the focused view, except the search input.
+     */
+    private fun clearPreferenceFocus() {
+        // Workaround to IllegalStateException being thrown when an EditText is focused
+        // while trying to change the preference screen.
+        root!!.findFocus()?.let {
+            if (it.id != R.id.search_input) {
+                it.clearFocus()
+            }
+        }
+    }
+
+
+    private fun onSearchQuery(query: String) {
+        currentQuery = query.trim()
+
+        if (currentQuery.isEmpty()) {
+            if (isSearching) {
+                exitSearchMode()
+            }
+            return
+        }
+
+        if (!isSearching) {
+            // The filter is applied in onBindPreferences once the combined screen has been bound.
+            enterSearchMode()
+            return
+        }
+
+        // If the filter is null, the preferences are still being bound, and the bind will apply currentQuery.
+        searchFilter?.let { showSearchResults(it.apply(currentQuery)) }
+    }
+
+
+    /**
+     * Replaces the preference screen with one that combines every available section, each preceded by a header.
+     */
+    @SuppressLint("RestrictedApi")
+    private fun enterSearchMode() {
+        clearPreferenceFocus()
+
+        val context = requireContext()
+        val screen = preferenceManager.createPreferenceScreen(context)
+        val sections = ArrayList<SettingsSearchSection<Section>>(availableSections.size)
+
+        for (section in availableSections) {
+            if (!section.isAvailable) {
+                continue
+            }
+
+            val header = SectionHeaderPreference(context).apply {
+                title = section.title
+                key = "search_header_${section.name}"
+            }
+
+            screen.addPreference(header)
+
+            val firstCategoryIndex = screen.preferenceCount
+
+            // Inflating into an existing screen merges the XML's children into it.
+            preferenceManager.inflateFromResource(context, section.xml, screen)
+
+            val categories = (firstCategoryIndex until screen.preferenceCount)
+                .map {
+                    val preference = screen.getPreference(it)
+
+                    preference as? PreferenceGroup
+                        ?: error("Top-level preference '${preference.key}' in ${section.name} must be a PreferenceCategory")
+                }
+
+            sections.add(SettingsSearchSection(section, header, categories))
+        }
+
+        searchSections = sections
+        searchFilter = null
+        isSearching = true
+
+        listView.removeAllViews()
+        preferenceScreen = screen
+    }
+
+
+    /**
+     * Leaves search mode and goes back to the section that was selected before searching.
+     */
+    private fun exitSearchMode() {
+        isSearching = false
+        searchFilter = null
+        searchSections = emptyList()
+
+        findViewById<View>(R.id.search_empty)!!.visibility = View.GONE
+
+        // This also restores the section list.
+        selectSection(section)
+    }
+
+
+    private fun showSearchResults(matched: List<Section>) {
+        findViewById<View>(R.id.search_empty)!!.visibility = if (matched.isEmpty()) View.VISIBLE else View.GONE
+        showSectionList(matched)
+    }
+
+
+    @SuppressLint("RestrictedApi")
+    private fun scrollToSection(section: Section) {
+        val header = searchSections.firstOrNull { it.id == section }?.header ?: return
+        val adapter = listView.adapter as? PreferenceGroupAdapter ?: return
+        val position = adapter.getPreferenceAdapterPosition(header)
+
+        if (position == RecyclerView.NO_POSITION) {
+            return
+        }
+
+        (listView.layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(position, 0)
+    }
+
+
+    /**
+     * Updates the visibility and highlight of the section list.
+     *
+     * @param matched The sections to show, or `null` to show all sections with the current [section] highlighted.
+     */
+    private fun showSectionList(matched: List<Section>?) {
+        sectionSelector.forEach { it.visibility = if (matched == null) View.VISIBLE else View.GONE }
+
+        for ((section, button) in sectionButtons) {
+
+            if (matched != null) {
+                button.visibility = if (section in matched) View.VISIBLE else View.GONE
+            }
+
+            button.setBackgroundColor(
+                if (matched == null && section == this.section) 0xFF363653.toInt() else Color.TRANSPARENT
+            )
         }
     }
 
@@ -236,9 +475,43 @@ class SettingsFragment : SettingsFragment() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) = Unit
 
 
+    @SuppressLint("RestrictedApi")
+    override fun onCreateAdapter(preferenceScreen: PreferenceScreen) = SettingsCardAdapter(preferenceScreen)
+
+
     // For whatever reason this is restricted API when it wasn't in previous SDKs.
     @SuppressLint("RestrictedApi")
-    override fun onBindPreferences() = when(section) {
+    override fun onBindPreferences() {
+        if (!isSearching) {
+            bindSection(section)
+            return
+        }
+
+        // Binding again would rebuild the filter from a screen whose filtered-out rows are already hidden.
+        searchFilter?.let {
+            showSearchResults(it.apply(currentQuery))
+            return
+        }
+
+        for (searchSection in searchSections) {
+            bindSection(searchSection.id)
+        }
+
+        // The filter snapshots hidden preferences, so it must be created after all bind handlers have run.
+        val filter = SettingsSearchFilter(searchSections)
+
+        searchFilter = filter
+        showSearchResults(filter.apply(currentQuery))
+    }
+
+
+    /**
+     * Attaches the preference handlers of [section] to the current screen.
+     *
+     * In search mode this runs for every section on one combined screen, so a preference that is set up from another
+     * section's value (e.g. `player_team` from `room_versus_mode`) must be updated from that value's change listener.
+     */
+    private fun bindSection(section: Section) = when (section) {
 
         Section.General -> handleGeneralSectionPreferences()
         Section.Graphics -> handleGraphicsSectionPreferences()
@@ -377,6 +650,21 @@ class SettingsFragment : SettingsFragment() {
     }
 
 
+    /**
+     * Builds the skin options for the skin picker.
+     */
+    private fun createSkinOptions(): MutableList<Option> {
+        val skinMain = File(Config.getSkinTopPath())
+        val skinMap = Config.getSkins()
+        val skins = skinMap.mapTo(ArrayList(skinMap.size + 1)) { Option(it.key, it.value) }
+
+        skins.sortBy { it.text.toString() }
+        skins.add(0, Option(skinMain.name + " (Default)", skinMain.path))
+
+        return skins
+    }
+
+
     private fun handleGraphicsSectionPreferences() {
         findPreference<SelectPreference>("frameLimiter")!!.setOnPreferenceChangeListener { _, newValue ->
             val frameLimiter = Config.parseFrameLimiter(newValue.toString())
@@ -390,14 +678,7 @@ class SettingsFragment : SettingsFragment() {
 
         findPreference<SelectPreference>("skinPath")!!.apply {
 
-            val skinMain = File(Config.getSkinTopPath())
-            val skinMap = Config.getSkins()
-            val skins = skinMap.mapTo(ArrayList(skinMap.size + 1)) { Option(it.key, it.value) }
-
-            skins.sortBy { it.text.toString() }
-            skins.add(0, Option(skinMain.name + " (Default)", skinMain.path))
-
-            options = skins
+            options = createSkinOptions()
 
             setOnPreferenceChangeListener { _, newValue ->
                 loadSkin(newValue.toString())
@@ -435,7 +716,7 @@ class SettingsFragment : SettingsFragment() {
 
 
     private fun handleGameplaySectionPreferences() {
-        val playfieldAreaDisplay = PlayfieldAreaDisplay()
+        val playfieldAreaDisplay = playfieldAreaDisplay ?: PlayfieldAreaDisplay().also { playfieldAreaDisplay = it }
 
         findPreference<SeekBarPreference>("playfieldSize")!!.apply {
             updatesContinuously = true
@@ -557,6 +838,10 @@ class SettingsFragment : SettingsFragment() {
 
             it.setText(newValue.toString())
             Config.loadConfig(requireActivity())
+
+            // Config.loadConfig() does not rescan skin folders, so the skin list must be reloaded explicitly.
+            Config.loadSkins()
+            findPreference<SelectPreference>("skinPath")?.options = createSkinOptions()
             false
         }
     }
@@ -681,7 +966,10 @@ class SettingsFragment : SettingsFragment() {
             value = Multiplayer.room!!.teamMode.ordinal.toString()
 
             setOnPreferenceChangeListener { _, newValue ->
-                RoomAPI.setRoomTeamMode(TeamMode.entries.getOrNull((newValue as String).toInt()) ?: return@setOnPreferenceChangeListener false)
+                val teamMode = TeamMode.entries.getOrNull((newValue as String).toInt()) ?: return@setOnPreferenceChangeListener false
+
+                findPreference<SelectPreference>("player_team")?.isEnabled = teamMode == TeamMode.TeamVS
+                RoomAPI.setRoomTeamMode(teamMode)
                 true
             }
         }
@@ -728,19 +1016,23 @@ class SettingsFragment : SettingsFragment() {
     }
 
 
-    private enum class Section(@param:XmlRes val xml: Int) {
+    private enum class Section(
+        @param:XmlRes val xml: Int,
+        val title: String,
+        @param:DrawableRes val icon: Int,
+    ) {
 
-        General(R.xml.settings_general),
-        Gameplay(R.xml.settings_gameplay),
-        Graphics(R.xml.settings_graphics),
-        Audio(R.xml.settings_audio),
-        Library(R.xml.settings_library),
-        Input(R.xml.settings_input),
-        Advanced(R.xml.settings_advanced),
+        General(R.xml.settings_general, "General", R.drawable.grid_view_24px),
+        Gameplay(R.xml.settings_gameplay, "Gameplay", R.drawable.videogame_asset_24px),
+        Graphics(R.xml.settings_graphics, "Graphics", R.drawable.display_settings_24px),
+        Audio(R.xml.settings_audio, "Audio", R.drawable.headphones_24px),
+        Library(R.xml.settings_library, "Library", R.drawable.library_music_24px),
+        Input(R.xml.settings_input, "Input", R.drawable.trackpad_input_24px),
+        Advanced(R.xml.settings_advanced, "Advanced", R.drawable.manufacturing_24px),
 
         // Multiplayer exclusive
-        Room(R.xml.multiplayer_room_settings),
-        Player(R.xml.multiplayer_player_settings)
+        Room(R.xml.multiplayer_room_settings, "Room", R.drawable.groups_24px),
+        Player(R.xml.multiplayer_player_settings, "Player", R.drawable.person_24px)
 
     }
 
