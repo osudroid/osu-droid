@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@android:id/title"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="4dp"
+    android:paddingTop="24dp"
+    android:paddingBottom="4dp"
+    android:textAllCaps="true"
+    android:textColor="#FFB2B2CC"
+    android:textSize="12sp"
+    android:textStyle="bold"
+    tools:text="Section" />
