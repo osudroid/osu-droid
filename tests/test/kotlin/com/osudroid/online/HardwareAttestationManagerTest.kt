@@ -1,6 +1,9 @@
 package com.osudroid.online
 
+import java.security.KeyPair
+import java.security.KeyPairGenerator
 import java.security.ProviderException
+import java.security.spec.ECGenParameterSpec
 import org.junit.Assert
 import org.junit.Test
 
@@ -84,4 +87,50 @@ class HardwareAttestationManagerTest {
         Assert.assertSame(teeError, thrown)
         Assert.assertEquals(0, thrown.suppressed.size)
     }
+
+    @Test
+    fun `Keystore fallback key is used when it succeeds`() {
+        var softwareCalls = 0
+
+        val softwareKey = HardwareAttestationManager.generateWithSoftwareFallback(
+            generateKeystore = {},
+            generateSoftware = {
+                softwareCalls++
+                generateJvmKeyPair()
+            }
+        )
+
+        Assert.assertNull(softwareKey)
+        Assert.assertEquals(0, softwareCalls)
+    }
+
+    @Test
+    fun `Software key is used when the keystore fails`() {
+        val expected = generateJvmKeyPair()
+
+        val actual: KeyPair? = HardwareAttestationManager.generateWithSoftwareFallback(
+            generateKeystore = { throw ProviderException("Keystore") },
+            generateSoftware = { expected }
+        )
+
+        Assert.assertSame(expected, actual)
+    }
+
+    @Test
+    fun `Software key failure is thrown`() {
+        val softwareError = IllegalStateException("Software")
+
+        val thrown = Assert.assertThrows(IllegalStateException::class.java) {
+            HardwareAttestationManager.generateWithSoftwareFallback(
+                generateKeystore = { throw ProviderException("Keystore") },
+                generateSoftware = { throw softwareError }
+            )
+        }
+
+        Assert.assertSame(softwareError, thrown)
+    }
+
+    private fun generateJvmKeyPair() = KeyPairGenerator.getInstance("EC").apply {
+        initialize(ECGenParameterSpec("secp256r1"))
+    }.generateKeyPair()
 }

@@ -30,6 +30,15 @@ object AttestationState {
     var attestationChain: String? = null
 
     /**
+     * Why hardware attestation could not be used for this session, or `null` if it can be.
+     *
+     * When set, the login uses an unattested key and sends this reason with it.
+     */
+    @Volatile
+    @JvmStatic
+    var fallbackError: String? = null
+
+    /**
      * Whether attestation is ready to be used. `true` once login succeeds with a valid attestation payload.
      */
     @Volatile
@@ -83,6 +92,7 @@ object AttestationState {
         pendingChallenge = null
         pendingToken = null
         attestationChain = null
+        fallbackError = null
         sessionAttestationReady = false
         keyGeneratedAt = null
         keygenDurationMs = null
