@@ -155,21 +155,31 @@ public class OnlineScoring {
                         break;
                     }
 
+                    // Only try again if the submission was never sent.
+                    // This ensures we don't send twice.
+                    boolean canRetry = false;
+
                     try {
                         success = OnlineManager.getInstance().sendRecord(beatmap, recordData, replayPath);
                     } catch (OnlineManager.OnlineManagerException e) {
-                        Debug.e("Login error: " + e.getMessage());
+                        Debug.e("Score submission error: " + e.getMessage());
                         success = false;
+                        canRetry = e.getCause() instanceof PostBuilder.RequestException requestException
+                            && requestException.wasNotSent();
                     }
 
-                    if (OnlineManager.getInstance().getFailMessage().length() > 0) {
-                        ToastLogger.showText(OnlineManager.getInstance().getFailMessage(), true);
-                        if (OnlineManager.getInstance().getFailMessage().equals("Invalid record data"))
-                            i = attemptCount;
-                    } else if (success) {
+                    if (success) {
                         Execution.updateThread(this::updatePanels);
                         OnlineManager mgr = OnlineManager.getInstance();
                         panel.show(mgr.getMapRank(), mgr.getRank(), mgr.getScore(), mgr.getAccuracy(), mgr.getPP());
+                        break;
+                    }
+
+                    if (!OnlineManager.getInstance().getFailMessage().isEmpty()) {
+                        ToastLogger.showText(OnlineManager.getInstance().getFailMessage(), true);
+                    }
+
+                    if (!canRetry) {
                         break;
                     }
 

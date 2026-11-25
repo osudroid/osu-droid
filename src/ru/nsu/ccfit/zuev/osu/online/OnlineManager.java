@@ -23,7 +23,9 @@ import org.anddev.andengine.util.Debug;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import ru.nsu.ccfit.zuev.osu.Config;
 import ru.nsu.ccfit.zuev.osu.GlobalManager;
@@ -46,6 +48,13 @@ public class OnlineManager {
     private static final String onlineVersion = "67";
 
     public static final OkHttpClient client = new OkHttpClient();
+
+    /**
+     * The client used for score submission, which waits longer for a response than {@link #client}.
+     */
+    private static final OkHttpClient submissionClient = client.newBuilder()
+        .readTimeout(30, TimeUnit.SECONDS)
+        .build();
 
     private static OnlineManager instance = null;
     private String failMessage = "";
@@ -103,6 +112,38 @@ public class OnlineManager {
             failMessage = "Cannot connect to server";
             throw new OnlineManagerException("Cannot connect to server", e);
         }
+
+        return handleResponse(response);
+    }
+
+    /**
+     * Sends a request once, without sending it again on failure.
+     *
+     * @param post The request to send.
+     * @param url The URL to send the request to.
+     * @param httpClient The client to send the request with.
+     * @return The response lines, or {@code null} if the request was answered with a failure.
+     * @throws OnlineManagerException If the request could not be completed.
+     */
+    private ArrayList<String> sendRequestOnce(PostBuilder post, String url, OkHttpClient httpClient) throws OnlineManagerException {
+        ArrayList<String> response;
+
+        try {
+            response = post.request(httpClient, url);
+        } catch (RequestException e) {
+            Debug.e(e.getMessage(), e);
+
+            failMessage = e.getCause() instanceof SocketTimeoutException
+                ? "Timed out waiting for a response"
+                : "Cannot connect to server";
+
+            throw new OnlineManagerException(failMessage, e);
+        }
+
+        return handleResponse(response);
+    }
+
+    private ArrayList<String> handleResponse(ArrayList<String> response) {
         failMessage = "";
 
         //TODO debug code
@@ -301,7 +342,7 @@ public class OnlineManager {
             return false;
         }
 
-        ArrayList<String> response = sendRequest(post, endpoint + "submit.php");
+        ArrayList<String> response = sendRequestOnce(post, endpoint + "submit.php", submissionClient);
 
         if (response == null) {
             return false;
@@ -316,7 +357,7 @@ public class OnlineManager {
         }
 
         String[] resp = response.get(1).split("\\s+");
-        if (resp.length < 4) {
+        if (resp.length < 5) {
             failMessage = "Invalid server response";
             return false;
         }
