@@ -37,6 +37,7 @@ import com.reco1l.framework.bass.URLBassStream
 import com.reco1l.framework.net.IFileRequestObserver
 import com.reco1l.framework.net.JsonArrayRequest
 import com.reco1l.framework.net.UnsuccessfulResponseException
+import com.reco1l.framework.net.WebRequest
 import com.osudroid.beatmaplisting.BeatmapMirrorSearchRequestModel.OrderType
 import com.osudroid.beatmaplisting.BeatmapMirrorSearchRequestModel.SortType
 import com.osudroid.ui.OsuColors
@@ -60,7 +61,6 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager
 import ru.nsu.ccfit.zuev.osu.MainScene.MusicOption
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osuplus.R
-import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.TimeZone
 import kotlinx.coroutines.CancellationException
@@ -788,10 +788,11 @@ class BeatmapSetViewHolder(itemView: View, private val mediaScope: CoroutineScop
             coverJob = mediaScope.launch {
 
                 try {
-                    URL(beatmapSet.thumbnail).openStream().use {
+                    WebRequest(beatmapSet.thumbnail).use { request ->
+                        request.execute()
                         ensureActive()
 
-                        val bitmap = BitmapFactory.decodeStream(it)
+                        val bitmap = BitmapFactory.decodeStream(request.responseBody.byteStream())
 
                         mainThread {
                             cover.setImageBitmap(bitmap)
