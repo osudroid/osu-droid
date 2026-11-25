@@ -117,6 +117,23 @@ class HardwareAttestationManagerTest {
     }
 
     @Test
+    fun `Software key is used when the keystore key cannot be used after it is generated`() {
+        val expected = generateJvmKeyPair()
+        var generated = false
+
+        val actual: KeyPair? = HardwareAttestationManager.generateWithSoftwareFallback(
+            generateKeystore = {
+                generated = true
+                throw IllegalStateException("The Keystore key has no readable public key.")
+            },
+            generateSoftware = { expected }
+        )
+
+        Assert.assertTrue(generated)
+        Assert.assertSame(expected, actual)
+    }
+
+    @Test
     fun `Software key failure is thrown`() {
         val softwareError = IllegalStateException("Software")
 

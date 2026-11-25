@@ -44,6 +44,14 @@ object AttestationDiagnostics {
         AttestationState.keygenDurationMs?.let { post.addParam("keygenMs", it.toString()) }
     }
 
+    /**
+     * Whether an HTTP status is one that may pass on a second try, which is any 5xx status and 429.
+     *
+     * @param code The HTTP status code of a response.
+     */
+    @JvmStatic
+    fun isTransientHttpStatus(code: Int) = code == 429 || code in 500..599
+
     private fun findRootCause(error: Throwable): Throwable {
         val visited = mutableSetOf<Throwable>()
         var current = error

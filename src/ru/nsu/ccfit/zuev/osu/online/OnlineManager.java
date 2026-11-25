@@ -535,7 +535,7 @@ public class OnlineManager {
                 return useFallbackKey(AttestationDiagnostics.describeFailure("challenge", challengeError));
             }
 
-            // Without a connection, a login without attestation would fail too.
+            // Nothing came back, or only a retryable status twice, so the login is not started.
             failMessage = "Cannot obtain attestation challenge";
             return false;
         }
@@ -606,42 +606,51 @@ public class OnlineManager {
     }
 
     /**
-     * Requests an attestation challenge from the server.
+     * Requests an attestation challenge, asking a second time if the first answer is a 5xx status or 429.
      *
-     * @return Why the server did not provide a usable challenge. This is {@code null} if it did, and also if it could
-     * not be reached, since a report of that would not reach it either.
+     * @return Why no usable challenge came back. This is {@code null} if one did, and also if the request
+     * could not be answered (unreachable, or still a 5xx status or 429 on the second try). The caller
+     * treats the latter like a missing connection and does not start a login without attestation.
      */
     private String fetchAttestationChallenge() {
         var request = new Request.Builder().url(attestationChallengeEndpoint).get().build();
 
-        try (var response = client.newCall(request).execute()) {
-            if (!response.isSuccessful() || response.body() == null) {
-                return "HTTP " + response.code();
+        for (int attempt = 0; attempt < 2; attempt++) {
+            try (var response = client.newCall(request).execute()) {
+                if (!response.isSuccessful() || response.body() == null) {
+                    if (AttestationDiagnostics.isTransientHttpStatus(response.code())) {
+                        continue;
+                    }
+
+                    return "HTTP " + response.code();
+                }
+
+                var body = response.body().string();
+                var json = new JSONObject(body);
+
+                var challengeBase64 = json.optString("challenge");
+                var token = json.optString("token");
+
+                if (challengeBase64.isEmpty() || token.isEmpty()) {
+                    return "Invalid attestation challenge response";
+                }
+
+                AttestationState.setPendingChallenge(Base64.decode(challengeBase64, Base64.DEFAULT));
+                AttestationState.setPendingToken(token);
+
+                return null;
+            } catch (IOException e) {
+                Debug.e("fetchAttestationChallenge " + e.getMessage(), e);
+
+                return null;
+            } catch (Exception e) {
+                Debug.e("fetchAttestationChallenge " + e.getMessage(), e);
+
+                return e.toString();
             }
-
-            var body = response.body().string();
-            var json = new JSONObject(body);
-
-            var challengeBase64 = json.optString("challenge");
-            var token = json.optString("token");
-
-            if (challengeBase64.isEmpty() || token.isEmpty()) {
-                return "Invalid attestation challenge response";
-            }
-
-            AttestationState.setPendingChallenge(Base64.decode(challengeBase64, Base64.DEFAULT));
-            AttestationState.setPendingToken(token);
-
-            return null;
-        } catch (IOException e) {
-            Debug.e("fetchAttestationChallenge " + e.getMessage(), e);
-
-            return null;
-        } catch (Exception e) {
-            Debug.e("fetchAttestationChallenge " + e.getMessage(), e);
-
-            return e.toString();
         }
+
+        return null;
     }
 
     private boolean ensureAttestationReady() {

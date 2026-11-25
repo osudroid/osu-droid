@@ -154,6 +154,30 @@ object HardwareAttestationManager {
             initialize(spec)
             generateKeyPair()
         }
+
+        verifyKeystoreKey()
+    }
+
+    /**
+     * Checks that the Keystore key can be used, that is its public key can be read back and that it can sign.
+     *
+     * Some devices generate a key whose certificate cannot be read, or whose private key cannot sign. Such a key
+     * would make every later use of it fail, so this throws to let the caller use an in-memory key instead.
+     */
+    private fun verifyKeystoreKey() {
+        val keyStore = getKeyStore()
+
+        checkNotNull(keyStore.getCertificate(KEY_ALIAS)?.publicKey) { "The Keystore key has no readable public key." }
+
+        val privateKey = checkNotNull(keyStore.getKey(KEY_ALIAS, null) as? PrivateKey) {
+            "The Keystore key has no usable private key."
+        }
+
+        Signature.getInstance("SHA256withECDSA").apply {
+            initSign(privateKey)
+            update(ByteArray(1))
+            sign()
+        }
     }
 
     /**
