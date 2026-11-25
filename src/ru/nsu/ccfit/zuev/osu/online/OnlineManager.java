@@ -156,20 +156,34 @@ public class OnlineManager {
                 return false;
             }
 
-            var chain = AttestationState.getAttestationChain();
-
-            if (chain == null || chain.isEmpty()) {
-                failMessage = "Attestation failed";
-                return false;
-            }
-
             PostBuilder post = createLoginPost();
-            post.addParam("attestationChain", chain);
+            var fallbackError = AttestationState.getFallbackError();
 
-            var token = AttestationState.consumePendingToken();
+            if (fallbackError != null) {
+                // Send the session key in place of an attestation chain.
+                var publicKey = getFallbackPublicKey();
 
-            if (token != null) {
-                post.addParam("attestationToken", token);
+                if (publicKey == null) {
+                    return false;
+                }
+
+                post.addParam("attestationError", fallbackError);
+                post.addParam("sessionPublicKey", publicKey);
+            } else {
+                var chain = AttestationState.getAttestationChain();
+
+                if (chain == null || chain.isEmpty()) {
+                    failMessage = "Attestation failed";
+                    return false;
+                }
+
+                post.addParam("attestationChain", chain);
+
+                var token = AttestationState.consumePendingToken();
+
+                if (token != null) {
+                    post.addParam("attestationToken", token);
+                }
             }
 
             ArrayList<String> response = sendRequest(post, endpoint + "login.php");
@@ -227,23 +241,6 @@ public class OnlineManager {
         AttestationDiagnostics.addDeviceParams(post);
 
         return post;
-    }
-
-    /**
-     * Reports attestation failure to the server.
-     * <p>
-     * The login has already failed at this point, so this must not affect its outcome.
-     *
-     * @param error The description of the failure.
-     */
-    private void reportAttestationFailure(String error) {
-        try {
-            PostBuilder post = createLoginPost();
-            post.addParam("attestationError", error);
-            post.requestWithAttempts(endpoint + "login.php", 1);
-        } catch (Exception e) {
-            Debug.e("reportAttestationFailure " + e.getMessage(), e);
-        }
     }
 
     boolean tryToLogIn() throws OnlineManagerException {
@@ -534,12 +531,12 @@ public class OnlineManager {
         var challenge = AttestationState.getPendingChallenge();
 
         if (challenge == null || challenge.length == 0) {
-            failMessage = "Cannot obtain attestation challenge";
-
             if (challengeError != null) {
-                reportAttestationFailure(AttestationDiagnostics.describeFailure("challenge", challengeError));
+                return useFallbackKey(AttestationDiagnostics.describeFailure("challenge", challengeError));
             }
 
+            // Nothing came back, or only a retryable status twice, so the login is not started.
+            failMessage = "Cannot obtain attestation challenge";
             return false;
         }
 
@@ -548,64 +545,112 @@ public class OnlineManager {
             var chain = HardwareAttestationManager.getAttestationChainPem();
 
             if (chain == null || chain.isEmpty()) {
-                failMessage = "Cannot create attestation chain";
-                reportAttestationFailure(AttestationDiagnostics.describeFailure("chain", "empty"));
-                return false;
+                return useFallbackKey(AttestationDiagnostics.describeFailure("chain", "empty"));
             }
 
             AttestationState.setAttestationChain(chain);
             return AttestationState.getPendingToken() != null;
         } catch (Exception e) {
-            failMessage = "Hardware attestation failed";
-
             // Debug.e() is compiled out in release builds, so record the raw cause (e.g. a
             // Keystore/RKP failure) to Crashlytics to get visibility into why real devices
             // fail attestation key generation.
             FirebaseCrashlytics.getInstance().recordException(e);
 
-            reportAttestationFailure(AttestationDiagnostics.describeFailure("keygen", e));
-
-            throw new OnlineManagerException(failMessage, e);
+            return useFallbackKey(AttestationDiagnostics.describeFailure("keygen", e));
         }
     }
 
     /**
-     * Requests an attestation challenge from the server.
+     * Switches this login to an unattested session key, so that the login still goes ahead
+     * and carries the reason attestation failed.
      *
-     * @return Why the server did not provide a usable challenge. This is {@code null} if it did, and also if it could
-     * not be reached, since a report of that would not reach it either.
+     * @param error The description of why attestation failed.
+     * @return Whether a fallback key is ready.
+     */
+    private boolean useFallbackKey(String error) {
+        try {
+            AttestationState.setFallbackError(error);
+            HardwareAttestationManager.generateFallbackKeyPair();
+
+            return true;
+        } catch (Exception e) {
+            AttestationState.setFallbackError(null);
+            failMessage = "Hardware attestation failed";
+            FirebaseCrashlytics.getInstance().recordException(e);
+
+            return false;
+        }
+    }
+
+    /**
+     * Obtains the fallback key to send with a login.
+     *
+     * @return The key as PEM, or {@code null} if it is not available, in which case {@link #failMessage} is set.
+     */
+    private String getFallbackPublicKey() {
+        try {
+            var publicKey = HardwareAttestationManager.getPublicKeyPem();
+
+            if (publicKey == null || publicKey.isEmpty()) {
+                failMessage = "Hardware attestation failed";
+                return null;
+            }
+
+            return publicKey;
+        } catch (Exception e) {
+            failMessage = "Hardware attestation failed";
+            FirebaseCrashlytics.getInstance().recordException(e);
+
+            return null;
+        }
+    }
+
+    /**
+     * Requests an attestation challenge, asking a second time if the first answer is a 5xx status or 429.
+     *
+     * @return Why no usable challenge came back. This is {@code null} if one did, and also if the request
+     * could not be answered (unreachable, or still a 5xx status or 429 on the second try). The caller
+     * treats the latter like a missing connection and does not start a login without attestation.
      */
     private String fetchAttestationChallenge() {
         var request = new Request.Builder().url(attestationChallengeEndpoint).get().build();
 
-        try (var response = client.newCall(request).execute()) {
-            if (!response.isSuccessful() || response.body() == null) {
-                return "HTTP " + response.code();
+        for (int attempt = 0; attempt < 2; attempt++) {
+            try (var response = client.newCall(request).execute()) {
+                if (!response.isSuccessful() || response.body() == null) {
+                    if (AttestationDiagnostics.isTransientHttpStatus(response.code())) {
+                        continue;
+                    }
+
+                    return "HTTP " + response.code();
+                }
+
+                var body = response.body().string();
+                var json = new JSONObject(body);
+
+                var challengeBase64 = json.optString("challenge");
+                var token = json.optString("token");
+
+                if (challengeBase64.isEmpty() || token.isEmpty()) {
+                    return "Invalid attestation challenge response";
+                }
+
+                AttestationState.setPendingChallenge(Base64.decode(challengeBase64, Base64.DEFAULT));
+                AttestationState.setPendingToken(token);
+
+                return null;
+            } catch (IOException e) {
+                Debug.e("fetchAttestationChallenge " + e.getMessage(), e);
+
+                return null;
+            } catch (Exception e) {
+                Debug.e("fetchAttestationChallenge " + e.getMessage(), e);
+
+                return e.toString();
             }
-
-            var body = response.body().string();
-            var json = new JSONObject(body);
-
-            var challengeBase64 = json.optString("challenge");
-            var token = json.optString("token");
-
-            if (challengeBase64.isEmpty() || token.isEmpty()) {
-                return "Invalid attestation challenge response";
-            }
-
-            AttestationState.setPendingChallenge(Base64.decode(challengeBase64, Base64.DEFAULT));
-            AttestationState.setPendingToken(token);
-
-            return null;
-        } catch (IOException e) {
-            Debug.e("fetchAttestationChallenge " + e.getMessage(), e);
-
-            return null;
-        } catch (Exception e) {
-            Debug.e("fetchAttestationChallenge " + e.getMessage(), e);
-
-            return e.toString();
         }
+
+        return null;
     }
 
     private boolean ensureAttestationReady() {

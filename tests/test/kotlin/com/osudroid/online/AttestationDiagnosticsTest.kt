@@ -30,6 +30,20 @@ class AttestationDiagnosticsTest {
     }
 
     @Test
+    fun `Test 5xx and 429 statuses are transient`() {
+        for (code in listOf(429, 500, 502, 503, 599)) {
+            Assert.assertTrue("HTTP $code", AttestationDiagnostics.isTransientHttpStatus(code))
+        }
+    }
+
+    @Test
+    fun `Test other statuses are not transient`() {
+        for (code in listOf(200, 301, 400, 401, 403, 404, 428, 430, 499, 600)) {
+            Assert.assertFalse("HTTP $code", AttestationDiagnostics.isTransientHttpStatus(code))
+        }
+    }
+
+    @Test
     fun `Test failure description names the stage and the root cause`() {
         val error = RuntimeException("outer", ProviderException("middle", IllegalStateException("Keystore error 7")))
 

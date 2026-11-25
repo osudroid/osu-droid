@@ -8,6 +8,7 @@ class AttestationStateTest {
     @After
     fun tearDown() {
         AttestationState.pendingToken = null
+        AttestationState.fallbackError = null
     }
 
     @Test
@@ -30,5 +31,14 @@ class AttestationStateTest {
     @Test
     fun `Consuming without a pending token returns nothing`() {
         Assert.assertNull(AttestationState.consumePendingToken())
+    }
+
+    @Test
+    fun `clearSession resets fallbackError`() {
+        AttestationState.fallbackError = "keygen: failed"
+
+        AttestationState.clearSession()
+
+        Assert.assertNull(AttestationState.fallbackError)
     }
 }
