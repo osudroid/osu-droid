@@ -285,7 +285,7 @@ class BeatmapListing(private val initialLink: BeatmapLink? = null) : BaseFragmen
                 }
 
                 if (beatmapSet.beatmaps.isEmpty()) {
-                    ToastLogger.showText("This beatmap set has no osu!standard difficulties.", true)
+                    ToastLogger.showText("This beatmapset has no osu!standard difficulties.", true)
                     indicator.visibility = GONE
                     return@mainThread
                 }
@@ -609,7 +609,7 @@ class BeatmapSetAdapter(private val previewPlayer: BeatmapPreviewPlayer) : Recyc
     var data = mutableListOf<BeatmapSetModel>()
 
     /**
-     * The beatmap set ID and the optional beatmap ID whose details should be opened once the set is bound.
+     * The beatmapset ID and the optional beatmap ID whose details should be opened once the set is bound.
      */
     var pendingAutoOpen: Pair<Long, Long?>? = null
 
@@ -779,7 +779,7 @@ class BeatmapSetViewHolder(
                 }
 
                 // This job is canceled on the main thread when the card is bound again,
-                // so the cover can only be applied to the beatmap set it was loaded for.
+                // so the cover can only be applied to the beatmapset it was loaded for.
                 withContext(Dispatchers.Main) {
                     cover.setImageBitmap(bitmap)
                     detailsFragment?.setCover(bitmap)
@@ -822,7 +822,7 @@ class BeatmapSetViewHolder(
     }
 
     /**
-     * Shows whether the bound beatmap set is being previewed on this card and its details.
+     * Shows whether the bound beatmapset is being previewed on this card and its details.
      */
     fun updatePreviewButtons() {
         previewButton.setPreviewIcon(beatmapSetId != null && previewPlayer.beatmapSetId.value == beatmapSetId)
