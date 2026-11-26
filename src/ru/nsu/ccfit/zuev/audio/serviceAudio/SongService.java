@@ -37,6 +37,9 @@ public class SongService extends Service {
         // See https://www.un4seen.com/forum/?topic=19601 for more information.
         BASS.BASS_SetConfig(BASS.BASS_CONFIG_DEV_TIMEOUT, 0);
 
+        // Don't wait indefinitely for stream data.
+        BASS.BASS_SetConfig(BASS.BASS_CONFIG_NET_READTIMEOUT, 10000);
+
         BASS.BASS_Init(-1, defaultFrequency, 0);
 
         Log.i("BASS-Config", "BASS initialized");
