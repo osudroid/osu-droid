@@ -32,6 +32,7 @@ open class WebRequest(private var url: HttpUrl) : AutoCloseable {
      * The call object used to execute the request.
      * It will be initialized upon [execute] call.
      */
+    @Volatile
     lateinit var call: Call
         protected set
 
@@ -46,6 +47,9 @@ open class WebRequest(private var url: HttpUrl) : AutoCloseable {
 
 
     private var request = Request.Builder().url(url).build()
+
+    @Volatile
+    private var isCancelled = false
 
 
     /**
@@ -117,10 +121,14 @@ open class WebRequest(private var url: HttpUrl) : AutoCloseable {
 
 
     /**
-     * Cancels the current request.
-     * This will have no effect if [execute] wasn't called or the request has already finished.
+     * Cancels the request. This method is thread-safe.
+     *
+     * If [execute] has not been called yet, the request fails as soon as it is executed.
+     * This has no effect if the request has already finished.
      */
     open fun cancel() {
+        isCancelled = true
+
         if (::call.isInitialized) {
             call.cancel()
         }
@@ -137,6 +145,11 @@ open class WebRequest(private var url: HttpUrl) : AutoCloseable {
 
         try {
             call = client.newCall(request)
+
+            // cancel() may have run before the call existed.
+            if (isCancelled) {
+                call.cancel()
+            }
 
             if (BuildConfig.DEBUG) {
                 Log.i("WebRequest", "Request to: " + request.url)
