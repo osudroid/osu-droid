@@ -54,12 +54,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.withContext
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ToastLogger
 import ru.nsu.ccfit.zuev.osuplus.R
 import java.text.SimpleDateFormat
 import java.util.TimeZone
-import kotlinx.coroutines.CancellationException
 import ru.nsu.ccfit.zuev.osu.RankedStatus
 
 
@@ -708,6 +708,8 @@ class BeatmapSetViewHolder(
 
     private var coverJob: Job? = null
 
+    private var coverRequest: WebRequest? = null
+
     private var beatmapSetId: Long? = null
 
 
@@ -753,34 +755,35 @@ class BeatmapSetViewHolder(
         }, TextView.BufferType.SPANNABLE)
 
         coverJob?.cancel()
+        // Cancel the request as well. Canceling the job alone won't stop it.
+        coverRequest?.cancel()
+        coverRequest = null
 
         if (beatmapSet.thumbnail != null && !BuildSettings.NO_TEXTURES_MODE) {
+            val request = WebRequest(beatmapSet.thumbnail)
+            coverRequest = request
+
             coverJob = mediaScope.launch {
-
-                try {
-                    WebRequest(beatmapSet.thumbnail).use { request ->
-                        request.execute()
-                        ensureActive()
-
-                        val bitmap = BitmapFactory.decodeStream(request.responseBody.byteStream())
-
-                        mainThread {
-                            cover.setImageBitmap(bitmap)
-                            detailsFragment?.setCover(bitmap)
-                        }
+                val bitmap = try {
+                    request.use {
+                        it.execute()
+                        BitmapFactory.decodeStream(it.responseBody.byteStream())
                     }
-
                 } catch (e: Exception) {
-                    mainThread { cover.setImageDrawable(null) }
-
-                    if (e is CancellationException) {
-                        throw e
-                    }
+                    // A canceled request also fails.
+                    // It's not an error we should log.
+                    ensureActive()
 
                     Log.e("BeatmapDownloader", "Failed to load cover.", e)
+                    null
                 }
 
-                coverJob = null
+                // This job is canceled on the main thread when the card is bound again,
+                // so the cover can only be applied to the beatmap set it was loaded for.
+                withContext(Dispatchers.Main) {
+                    cover.setImageBitmap(bitmap)
+                    detailsFragment?.setCover(bitmap)
+                }
             }
         } else {
             cover.setImageDrawable(null)
