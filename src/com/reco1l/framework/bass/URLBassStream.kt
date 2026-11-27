@@ -3,7 +3,18 @@ package com.reco1l.framework.bass
 import com.un4seen.bass.BASS
 import ru.nsu.ccfit.zuev.audio.Status
 
-class URLBassStream(url: String, onEnd: (URLBassStream) -> Unit = {}) {
+/**
+ * A BASS stream that plays from a URL.
+ *
+ * Construction of this class also creates the stream and blocks the calling thread until the stream has connected.
+ *
+ * @param url The URL to play from.
+ * @param request An object that identifies this stream's creation, so that it can be aborted
+ * with [cancel] while the stream is still connecting. Use a new object for each stream.
+ * @param onEnd Called when the stream ends.
+ * @throws IllegalStateException If the stream could not be created, including when its creation was aborted.
+ */
+class URLBassStream(url: String, request: Any? = null, onEnd: (URLBassStream) -> Unit = {}) {
 
 
     private var id = 0
@@ -28,7 +39,7 @@ class URLBassStream(url: String, onEnd: (URLBassStream) -> Unit = {}) {
 
     init {
 
-        id = BASS.BASS_StreamCreateURL(url, 0, BASS.BASS_STREAM_AUTOFREE, null, null)
+        id = BASS.BASS_StreamCreateURL(url, 0, BASS.BASS_STREAM_AUTOFREE, null, request)
 
         if (id == 0) {
             throw IllegalStateException("Failed to start stream, error code: ${BASS.BASS_ErrorGetCode()}")
@@ -73,6 +84,17 @@ class URLBassStream(url: String, onEnd: (URLBassStream) -> Unit = {}) {
     fun setVolume(volume: Float) {
         if (id != 0) {
             BASS.BASS_ChannelSetAttribute(id, BASS.BASS_ATTRIB_VOL, volume)
+        }
+    }
+
+    companion object {
+        /**
+         * Aborts every [URLBassStream] that was given [request] as its user and is still connecting.
+         *
+         * This does not wait for the creation to be aborted.
+         */
+        fun cancel(request: Any) {
+            BASS.BASS_StreamCancel(request)
         }
     }
 }
