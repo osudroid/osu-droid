@@ -18,7 +18,7 @@ final class NativeFrameTimestampSource implements FrameTimestampSource {
 
 	private static final String LIBRARY_NAME = "osudroid_frame_timestamps";
 
-	private static final int MINIMUM_SDK_INT = 26;
+	private static final int MINIMUM_SDK_INT = Build.VERSION_CODES.O;
 
 	/**
 	 * The native frame timestamps are enabled.
