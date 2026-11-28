@@ -45,3 +45,23 @@ jobs:
         path: |
           **/build/reports/
           **/build/test-results/
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v7
+
+    - name: Set up JDK 17 and Gradle
+      uses: ./.github/actions/setup-java-gradle
+
+    - name: Run lint
+      run: ./gradlew lintRelease --continue
+
+    - name: Upload lint results
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v7
+      with:
+        name: lint-reports
+        path: '**/build/reports/lint-results-*'
