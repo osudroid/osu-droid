@@ -126,7 +126,7 @@ object BeatmapHitObjectsParser : BeatmapSectionParser() {
             // A special case for Catmull sliders where the first control point is in the position of the slider.
             // This results in a duplicate (0, 0) point in the path.
             if (sliderType == SliderPathType.Catmull && it.size >= 2 && it[0] == it[1]) {
-                it.removeFirst()
+                it.removeAt(0)
             }
 
             // Edge-case rules (to match osu!stable).

@@ -229,7 +229,7 @@ abstract class VariableLengthStrainSkill<TObject : DifficultyHitObject>(mods: It
         val maxTotalLength = maxStoredSections * maxSectionLength
 
         while (totalLength > maxTotalLength) {
-            totalLength -= strainPeaks.removeFirst().sectionLength
+            totalLength -= strainPeaks.removeAt(0).sectionLength
         }
     }
 
