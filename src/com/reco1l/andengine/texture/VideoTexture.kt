@@ -8,12 +8,8 @@ import android.util.Log
 import android.view.*
 import androidx.media3.common.*
 import androidx.media3.common.util.UnstableApi
-import android.content.Context
 import android.os.Handler
 import androidx.media3.exoplayer.*
-import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
-import androidx.media3.exoplayer.video.VideoRendererEventListener
-import androidx.media3.decoder.ffmpeg.ExperimentalFfmpegVideoRenderer
 import org.anddev.andengine.opengl.texture.*
 import ru.nsu.ccfit.zuev.osu.GlobalManager
 import java.io.*
@@ -70,31 +66,9 @@ class VideoTexture(val source: String) : Texture(
     init {
         val context = GlobalManager.getInstance().mainActivity.applicationContext
 
-        // DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON auto-discovers FfmpegAudioRenderer via reflection.
-        // ExperimentalFfmpegVideoRenderer must be appended manually because DefaultRenderersFactory looks for the old
-        // name "FfmpegVideoRenderer" (since renamed).
-        val renderersFactory = object : DefaultRenderersFactory(context) {
-            override fun buildVideoRenderers(
-                context: Context,
-                extensionRendererMode: Int,
-                mediaCodecSelector: MediaCodecSelector,
-                enableDecoderFallback: Boolean,
-                eventHandler: Handler,
-                eventListener: VideoRendererEventListener,
-                allowedVideoJoiningTimeMs: Long,
-                out: ArrayList<Renderer>
-            ) {
-                super.buildVideoRenderers(context, extensionRendererMode, mediaCodecSelector,
-                    enableDecoderFallback, eventHandler, eventListener, allowedVideoJoiningTimeMs, out)
-
-                out.add(ExperimentalFfmpegVideoRenderer(
-                    allowedVideoJoiningTimeMs, eventHandler, eventListener, 50))
-            }
-        }.setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
-
         // ExoPlayer's builder is thread-safe, but subsequent API calls are not.
         // ExoPlayer enforces that they run on its designated looper (main thread here).
-        player = ExoPlayer.Builder(context, renderersFactory)
+        player = ExoPlayer.Builder(context)
             .setLooper(Looper.getMainLooper())
             .build()
 
