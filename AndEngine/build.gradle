@@ -3,11 +3,22 @@ apply plugin: 'com.android.library'
 android {
     namespace 'org.anddev.andengine'
     compileSdk 34
+    ndkVersion '22.1.7171670'
 
     defaultConfig {
         minSdkVersion 24
         //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 29
+        ndk {
+            abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path 'jni/CMakeLists.txt'
+            version '3.22.1'
+        }
     }
 
     sourceSets {
@@ -29,6 +40,26 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+// Copy compile_commands.json for arm64-v8a into jni/ so clangd finds it when walking up from jni/frame_timestamps.cpp.
+// Without this, it falls back to the system compiler and produces false-positive errors for JNI and C++ standard library types.
+tasks.configureEach { task ->
+    if (task.name ==~ /configureCMake.*/) {
+        task.doLast {
+            def ccFile = fileTree('.cxx') {
+                include '**/arm64-v8a/compile_commands.json'
+                exclude '**/tools/**'
+            }.files.find()
+
+            if (ccFile != null) {
+                copy {
+                    from ccFile
+                    into 'jni'
+                }
+            }
+        }
     }
 }
 
