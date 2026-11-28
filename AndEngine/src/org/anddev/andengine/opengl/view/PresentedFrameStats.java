@@ -20,7 +20,8 @@ public final class PresentedFrameStats {
 	public int presented;
 
 	/**
-	 * The number of frames that were replaced before reaching the display.
+	 * The number of frames the driver reported as not presented. Some drivers report those frames
+	 * as {@link #unknown} instead.
 	 */
 	public int dropped;
 

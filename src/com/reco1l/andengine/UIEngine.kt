@@ -210,7 +210,7 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options),
             presentedClock.onFramePresented(pBatch.presentTimes[i])
         }
 
-        presentedClock.isAvailable = pBatch.available
+        presentedClock.isAvailable = pBatch.isAvailable
     }
 
     override fun onUpdate(pNanosecondsElapsed: Long) {

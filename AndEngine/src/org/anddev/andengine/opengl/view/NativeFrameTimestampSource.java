@@ -91,23 +91,23 @@ final class NativeFrameTimestampSource implements FrameTimestampSource {
 			NativeFrameTimestampSource.sLibraryLoaded = true;
 		}
 
-        return switch (NativeFrameTimestampSource.nativeStart()) {
-            case START_OK -> {
-                this.mStarted = true;
-                yield true;
-            }
+		return switch (NativeFrameTimestampSource.nativeStart()) {
+			case START_OK -> {
+				this.mStarted = true;
+				yield true;
+			}
 
-            case START_UNSUPPORTED -> {
-                NativeFrameTimestampSource.sUnsupported = true;
-                yield false;
-            }
+			case START_UNSUPPORTED -> {
+				NativeFrameTimestampSource.sUnsupported = true;
+				yield false;
+			}
 
 			// Cannot combine the switch together since Java fails.
 			case START_FAILED -> //noinspection DuplicateBranchesInSwitch
-                    false;
+				false;
 
 			default -> false;
-        };
+		};
 	}
 
 	@Override
@@ -146,5 +146,10 @@ final class NativeFrameTimestampSource implements FrameTimestampSource {
 
 	private static native void nativeStop();
 
+	/**
+	 * Looks up the present times of the given frames, in order.
+	 * <p>
+	 * If a frame is still pending, the frames after it are reported as pending without being looked up.
+	 */
 	private static native long nativeQueryAndGetNextFrameId(long[] pFrameIDs, int pCount, long[] pResults);
 }

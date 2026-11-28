@@ -129,6 +129,12 @@ public class MainActivity extends BaseGameActivity implements
     private static final float MAXIMUM_UPDATE_HZ = 1000;
 
     private float currentRefreshRate = 60;
+
+    /**
+     * The frame limiter mode that was last applied to the render surface, or <code>null</code> if none was yet.
+     */
+    private FrameLimiterMode appliedFrameLimiterMode;
+
     private float maxRefreshRate = 60;
     private int maxRefreshRateModeId = 0;
     private MessageDialog multiWindowAlert;
@@ -1205,7 +1211,13 @@ public class MainActivity extends BaseGameActivity implements
             mRenderSurfaceView.setVSyncEnabled(vsync);
             mRenderSurfaceView.setPresentationTimeEnabled(mode != FrameLimiterMode.VSync);
             mRenderSurfaceView.setChoreographerPacingEnabled(lowLatency);
-            mRenderSurfaceView.resetPresentedFrameTracking();
+
+            // Only a change of mode invalidates the measurements, not a refresh rate change that re-applies the same one.
+            if (appliedFrameLimiterMode != null && appliedFrameLimiterMode != mode) {
+                mRenderSurfaceView.resetPresentedFrameTracking();
+            }
+
+            appliedFrameLimiterMode = mode;
         }
 
         if (mEngine != null) {

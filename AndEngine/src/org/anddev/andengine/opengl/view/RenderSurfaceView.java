@@ -42,11 +42,9 @@ public class RenderSurfaceView extends GLSurfaceView {
 
 	public void setRenderer(final Engine pEngine) {
 		this.setOnTouchListener(pEngine);
-
 		// BEGIN osu!droid modified: presented frame tracking
 		pEngine.setPresentedFrameTracker(this.getPresentedFrameTracker());
 		// END osu!droid modified
-
 		this.mRenderer = new Renderer(pEngine);
 		this.setRenderer(this.mRenderer);
 	}

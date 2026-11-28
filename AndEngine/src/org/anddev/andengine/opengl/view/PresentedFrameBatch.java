@@ -28,7 +28,7 @@ public final class PresentedFrameBatch {
 	/**
 	 * Whether presented frames are being tracked and have been seen since tracking was last reset.
 	 */
-	public boolean available;
+	public boolean isAvailable;
 
 	/**
 	 * Whether tracking was reset, or present times were discarded, since the previous drain.

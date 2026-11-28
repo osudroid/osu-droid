@@ -192,6 +192,9 @@ Java_org_anddev_andengine_opengl_view_NativeFrameTimestampSource_nativeQueryAndG
 
     static constexpr EGLint timestampNames[] = {EGL_DISPLAY_PRESENT_TIME_ANDROID};
 
+    // Frames are presented in order, so if one is still pending, the ones after it are too.
+    bool hasPendingFrame = false;
+
     jlong frameIds[CHUNK_SIZE];
     jlong results[CHUNK_SIZE];
 
@@ -205,11 +208,17 @@ Java_org_anddev_andengine_opengl_view_NativeFrameTimestampSource_nativeQueryAndG
         }
 
         for (jsize i = 0; i < length; ++i) {
+            if (hasPendingFrame) {
+                results[i] = RESULT_PENDING;
+                continue;
+            }
+
             EGLnsecsANDROID presentTime = EGL_TIMESTAMP_INVALID_ANDROID;
             const EGLBoolean succeeded = sGetFrameTimestamps(
                     display, surface, static_cast<EGLuint64KHR>(frameIds[i]), 1, timestampNames, &presentTime);
 
             results[i] = mapResult(succeeded, presentTime);
+            hasPendingFrame = results[i] == RESULT_PENDING;
         }
 
         pEnv->SetLongArrayRegion(pResults, offset, length, results);

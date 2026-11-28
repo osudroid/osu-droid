@@ -48,7 +48,7 @@ public final class PresentedFrameTracker {
 	@GLThread
 	private boolean mAvailable;
 	@GLThread
-	private boolean mReset;
+	private boolean mWasReset;
 	@GLThread
 	private long mLastPresentNanos;
 
@@ -173,11 +173,11 @@ public final class PresentedFrameTracker {
 	public void drainInto(final PresentedFrameBatch pOut) {
 		System.arraycopy(this.mPresentTimes, 0, pOut.presentTimes, 0, this.mPresentTimeCount);
 		pOut.count = this.mPresentTimeCount;
-		pOut.available = this.mAvailable;
-		pOut.wasReset = this.mReset;
+		pOut.isAvailable = this.mAvailable;
+		pOut.wasReset = this.mWasReset;
 
 		this.mPresentTimeCount = 0;
-		this.mReset = false;
+		this.mWasReset = false;
 	}
 
 	/**
@@ -237,7 +237,7 @@ public final class PresentedFrameTracker {
 
 		this.mActive = this.mSource.start();
 		this.mLastPresentNanos = this.mNanoTime.getAsLong();
-		this.mReset = true;
+		this.mWasReset = true;
 	}
 
 	/**
@@ -281,7 +281,7 @@ public final class PresentedFrameTracker {
 		if (this.mPresentTimeCount == PresentedFrameBatch.CAPACITY) {
 			removeFirst(this.mPresentTimes, PresentedFrameBatch.CAPACITY);
 			this.mPresentTimeCount--;
-			this.mReset = true;
+			this.mWasReset = true;
 		}
 
 		this.mPresentTimes[this.mPresentTimeCount++] = pPresentTime;

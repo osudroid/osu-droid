@@ -22,7 +22,7 @@ class PresentedFrameTrackerTest {
 
         tracker.drainInto(batch)
 
-        assertFalse(batch.available)
+        assertFalse(batch.isAvailable)
     }
 
     @Test
@@ -37,7 +37,7 @@ class PresentedFrameTrackerTest {
         tracker.drainInto(batch)
 
         assertTrue(batch.wasReset)
-        assertFalse(batch.available)
+        assertFalse(batch.isAvailable)
     }
 
     @Test
@@ -52,7 +52,7 @@ class PresentedFrameTrackerTest {
         assertEquals(2, batch.count)
         assertEquals(100L, batch.presentTimes[0])
         assertEquals(200L, batch.presentTimes[1])
-        assertTrue(batch.available)
+        assertTrue(batch.isAvailable)
     }
 
     @Test
@@ -104,7 +104,7 @@ class PresentedFrameTrackerTest {
 
         tracker.drainInto(batch)
 
-        assertFalse(batch.available)
+        assertFalse(batch.isAvailable)
 
         val queries = source.queryCount
         repeat(5) { tracker.onBeforeSwap() }
@@ -161,12 +161,12 @@ class PresentedFrameTrackerTest {
         tracker.onBeforeSwap()
         tracker.drainInto(batch)
 
-        assertTrue(batch.available)
+        assertTrue(batch.isAvailable)
 
         tracker.onSurfaceDestroyed()
 
         tracker.drainInto(batch)
-        assertFalse(batch.available)
+        assertFalse(batch.isAvailable)
     }
 
     @Test
@@ -182,7 +182,7 @@ class PresentedFrameTrackerTest {
 
         tracker.drainInto(batch)
 
-        assertFalse(batch.available)
+        assertFalse(batch.isAvailable)
     }
 
     @Test
@@ -195,7 +195,7 @@ class PresentedFrameTrackerTest {
         assertEquals(1, source.stopCount)
         assertFalse(tracker.isActive)
         tracker.drainInto(batch)
-        assertFalse(batch.available)
+        assertFalse(batch.isAvailable)
     }
 
     @Test
@@ -284,7 +284,7 @@ class PresentedFrameTrackerTest {
 
         assertEquals(0, batch.count)
         assertFalse(batch.wasReset)
-        assertTrue(batch.available)
+        assertTrue(batch.isAvailable)
     }
 
     private fun enableAndSwap(frames: Int) {

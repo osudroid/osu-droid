@@ -50,6 +50,9 @@ public interface FrameTimestampSource {
 
 	/**
 	 * Looks up the present times of the given frames, then gets the ID of the frame about to be swapped.
+	 * <p>
+	 * The frames are expected oldest first. If a frame is still pending, the frames after it may be
+	 * reported as {@link #RESULT_PENDING} without being looked up.
 	 *
 	 * @param pFrameIDs The IDs of the frames to look up.
 	 * @param pCount    The number of IDs in {@code pFrameIDs}.
