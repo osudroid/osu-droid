@@ -3,17 +3,8 @@ package com.osudroid.ui
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import ru.nsu.ccfit.zuev.osu.Config
 
 class FPSCounterRulesTest {
-    @Test
-    fun `Presented frames are used only in VSync modes`() {
-        assertTrue(FPSCounterRules.usesPresentedFrames(Config.FRAME_LIMITER_VSYNC))
-        assertTrue(FPSCounterRules.usesPresentedFrames(Config.FRAME_LIMITER_VSYNC_LOW_LATENCY))
-        assertFalse(FPSCounterRules.usesPresentedFrames(Config.FRAME_LIMITER_UNLIMITED))
-        listOf(2, 4, 8).forEach { assertFalse(FPSCounterRules.usesPresentedFrames(it)) }
-    }
-
     @Test
     fun `Below target at under 80 percent of the aim on either rate`() {
         assertTrue(FPSCounterRules.isBelowTarget(95f, 1 / 120f, 120f))

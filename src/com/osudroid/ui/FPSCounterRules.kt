@@ -1,7 +1,5 @@
 package com.osudroid.ui
 
-import ru.nsu.ccfit.zuev.osu.Config
-
 /**
  * Decisions made by the [FPSCounter].
  */
@@ -15,14 +13,6 @@ internal object FPSCounterRules {
      * The fraction of the target rate below which the displayed rate counts as significantly low.
      */
     const val SIGNIFICANT_RATIO = 0.8f
-
-    /**
-     * Whether the counter measures presented frames rather than updates for a frame limiter setting.
-     *
-     * @param frameLimiter A value returned by [Config.getFrameLimiter].
-     */
-    fun usesPresentedFrames(frameLimiter: Int) =
-        frameLimiter == Config.FRAME_LIMITER_VSYNC || frameLimiter == Config.FRAME_LIMITER_VSYNC_LOW_LATENCY
 
     /**
      * Whether the counter reads the presented clock rather than the update clock.

@@ -21,22 +21,11 @@
     <string name="settings_search_hint">Search settings</string>
     <string name="settings_search_no_results">No settings found</string>
 
-    <string-array name="frame_limiter_names">
-        <item>VSync</item>
-        <item>VSync (low latency)</item>
-        <item>2x refresh rate</item>
-        <item>4x refresh rate</item>
-        <item>8x refresh rate</item>
-        <item>Basically unlimited</item>
-    </string-array>
-
-    <string-array name="frame_limiter_values" translatable="false">
-        <item>1</item>
-        <item>-1</item>
-        <item>2</item>
-        <item>4</item>
-        <item>8</item>
-        <item>0</item>
-    </string-array>
+    <string name="opt_frame_limiter_vsync">VSync</string>
+    <string name="opt_frame_limiter_vsync_low_latency">VSync (low latency)</string>
+    <string name="opt_frame_limiter_refresh_rate_2x">2x refresh rate</string>
+    <string name="opt_frame_limiter_refresh_rate_4x">4x refresh rate</string>
+    <string name="opt_frame_limiter_refresh_rate_8x">8x refresh rate</string>
+    <string name="opt_frame_limiter_unlimited">Basically unlimited</string>
 
 </resources>

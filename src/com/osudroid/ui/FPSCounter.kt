@@ -128,7 +128,7 @@ class FPSCounter : UIText() {
     }
 
     private fun updatePresentedFrameTracking() {
-        val shouldTrack = isVisible && FPSCounterRules.usesPresentedFrames(Config.getFrameLimiter())
+        val shouldTrack = isVisible && Config.getFrameLimiter().isVSync
 
         if (shouldTrack != isTrackingPresentedFrames) {
             isTrackingPresentedFrames = shouldTrack
