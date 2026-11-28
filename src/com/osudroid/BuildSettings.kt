@@ -25,6 +25,16 @@ object BuildSettings {
     const val DEBUG_PLAYGROUND = false
 
     /**
+     * Delays every Nth frame on the GL thread in debug builds to test the FPS counter, or 0 to turn it off.
+     */
+    const val DEBUG_FRAME_DELAY_INTERVAL = 0
+
+    /**
+     * How long to delay a frame in milliseconds when [DEBUG_FRAME_DELAY_INTERVAL] is enabled.
+     */
+    const val DEBUG_FRAME_DELAY_MS = 12
+
+    /**
      * The signature to use when skipping hardware attestation.
      */
     @JvmStatic

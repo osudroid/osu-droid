@@ -434,6 +434,14 @@ public class MainActivity extends BaseGameActivity implements
         this.mRenderSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 24, 0);
         this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGB_888);
         this.mRenderSurfaceView.setRenderer(this.mEngine);
+
+        if (BuildConfig.DEBUG && BuildSettings.DEBUG_FRAME_DELAY_INTERVAL > 0) {
+            this.mRenderSurfaceView.setDebugFrameDelay(
+                BuildSettings.DEBUG_FRAME_DELAY_INTERVAL,
+                BuildSettings.DEBUG_FRAME_DELAY_MS
+            );
+        }
+
         applyFrameLimiterSetting(Config.getFrameLimiter());
 
         RelativeLayout mainLayout = new RelativeLayout(this);
@@ -1170,6 +1178,17 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     /**
+     * Sets whether the render surface measures when frames are presented.
+     * <p>
+     * This method is thread-safe.
+     */
+    public void setPresentedFrameTrackingEnabled(boolean enabled) {
+        if (mRenderSurfaceView != null) {
+            mRenderSurfaceView.setPresentedFrameTrackingEnabled(enabled);
+        }
+    }
+
+    /**
      * Applies a frame limiter setting to the render surface and the update clock.
      *
      * @param frameLimiter A value returned by {@link Config#getFrameLimiter()}.
@@ -1185,6 +1204,7 @@ public class MainActivity extends BaseGameActivity implements
             mRenderSurfaceView.setVSyncEnabled(vsync);
             mRenderSurfaceView.setPresentationTimeEnabled(frameLimiter != Config.FRAME_LIMITER_VSYNC);
             mRenderSurfaceView.setChoreographerPacingEnabled(lowLatency);
+            mRenderSurfaceView.resetPresentedFrameTracking();
         }
 
         if (mEngine != null) {

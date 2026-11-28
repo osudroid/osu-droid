@@ -12,6 +12,7 @@ import java.util.Formatter
 import java.util.Locale
 import kotlin.math.min
 import kotlin.math.roundToInt
+import org.anddev.andengine.util.annotation.UpdateThread
 import ru.nsu.ccfit.zuev.osu.Config
 import ru.nsu.ccfit.zuev.osu.ResourceManager
 import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
@@ -22,6 +23,15 @@ import ru.nsu.ccfit.zuev.osu.GlobalManager.getInstance as getGlobal
 class FPSCounter : UIText() {
     private val updateClock
         get() = UIEngine.current.clock
+
+    private val presentedClock
+        get() = UIEngine.current.presentedClock
+
+    @UpdateThread
+    private var isTrackingPresentedFrames = false
+
+    @UpdateThread
+    private var wasUsingPresentedClock = false
 
     //region Counting logic
 
@@ -39,7 +49,6 @@ class FPSCounter : UIText() {
 
     private var aimFPS = 0f
 
-    private val spikeTime = 0.02f
     private val dampTime = 0.1f
 
     private val stringBuilder = StringBuilder(24)
@@ -86,6 +95,8 @@ class FPSCounter : UIText() {
     override fun onManagedUpdate(deltaTimeSec: Float) {
         isVisible = Config.isShowFPS()
 
+        updatePresentedFrameTracking()
+
         if (isVisible) {
             if (!wasVisible) {
                 requestDisplay()
@@ -116,7 +127,19 @@ class FPSCounter : UIText() {
         }
     }
 
+    private fun updatePresentedFrameTracking() {
+        val shouldTrack = isVisible && FPSCounterRules.usesPresentedFrames(Config.getFrameLimiter())
+
+        if (shouldTrack != isTrackingPresentedFrames) {
+            isTrackingPresentedFrames = shouldTrack
+            getGlobal().mainActivity.setPresentedFrameTrackingEnabled(shouldTrack)
+        }
+    }
+
     private fun updateFPS() {
+        // The presented clock's window must cover exactly one update, whichever clock is displayed.
+        presentedClock.processFrame()
+
         val elapsedUpdateFrameTime = updateClock.elapsedFrameTime
 
         // If the game goes into a suspended state (i.e., debugger attached), we want to ignore really long periods of
@@ -125,10 +148,25 @@ class FPSCounter : UIText() {
             return
         }
 
+        val fpsClock = if (
+            FPSCounterRules.usesPresentedClock(
+                isTrackingPresentedFrames,
+                presentedClock.isAvailable,
+                presentedClock.framesPerSecond
+            )
+        ) presentedClock else updateClock
+
+        val isPresentedClockUsed = fpsClock === presentedClock
+        val hasSourceChanged = isPresentedClockUsed != wasUsingPresentedClock
+
+        wasUsingPresentedClock = isPresentedClockUsed
+
         // Handle the case where the window has become inactive (we want to show the FPS as it is changing, even if it
         // is not an outlier).
-        val aimRatesChanged = updateAimFPS()
-        val hasUpdateSpike = displayedFrameTime < spikeTime && elapsedUpdateFrameTime > spikeTime
+        val aimRatesChanged = updateAimFPS() or hasSourceChanged
+        val hasUpdateSpike = FPSCounterRules.isFrameTimeSpike(displayedFrameTime, elapsedUpdateFrameTime)
+        val hasFpsSpike = isPresentedClockUsed &&
+            FPSCounterRules.isFpsSpike(displayedFpsCount, presentedClock.longestFrameTime)
 
         displayedFrameTime = Interpolation.dampContinuously(
             displayedFrameTime,
@@ -137,21 +175,22 @@ class FPSCounter : UIText() {
             elapsedUpdateFrameTime
         )
 
-        displayedFpsCount = if (hasUpdateSpike) {
-            // Show spike time using raw elapsed value, to account for `framesPerSecond` being so averaged spike frames
-            // do not show.
-            1f / elapsedUpdateFrameTime
-        } else {
-            Interpolation.dampContinuously(
+        displayedFpsCount = when {
+            // Show spike time using the raw longest gap, to account for `framesPerSecond` being so averaged spike
+            // frames do not show.
+            hasFpsSpike -> 1f / presentedClock.longestFrameTime
+            !isPresentedClockUsed && hasUpdateSpike -> 1f / elapsedUpdateFrameTime
+            else -> Interpolation.dampContinuously(
                 displayedFpsCount,
-                updateClock.framesPerSecond,
+                fpsClock.framesPerSecond,
                 dampTime,
                 updateClock.timeInfo.elapsed
             )
         }
 
         // Force update if we are below the target by a certain threshold.
-        val hasSignificantChanges = aimRatesChanged || hasUpdateSpike || displayedFpsCount < aimFPS * 0.6f
+        val hasSignificantChanges = aimRatesChanged || hasUpdateSpike || hasFpsSpike ||
+            FPSCounterRules.isBelowTarget(displayedFpsCount, displayedFrameTime, aimFPS)
 
         if (hasSignificantChanges) {
             requestDisplay()
@@ -249,6 +288,7 @@ class FPSCounter : UIText() {
         isDisplayed = false
         timeSinceLastSignificantChange = 0f
         wasVisible = false
+        wasUsingPresentedClock = false
     }
 
     //endregion
