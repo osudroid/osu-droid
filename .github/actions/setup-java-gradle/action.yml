@@ -21,7 +21,7 @@ runs:
         java-version: ${{ inputs.java-version }}
 
     - name: "Install NDK and CMake"
-      run: '"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;22.1.7171670" "cmake;3.22.1" > /dev/null'
+      run: '"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;30.0.16248370" "cmake;4.1.2" > /dev/null'
       shell: bash
 
     - name: "Grant execute permission for gradlew"

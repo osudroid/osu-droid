@@ -9,7 +9,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.2.2'
+        classpath 'com.android.tools.build:gradle:8.13.2'
         classpath 'com.google.gms:google-services:4.4.2'
         classpath 'com.google.firebase:firebase-crashlytics-gradle:3.0.3'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -58,8 +58,8 @@ apply plugin: 'androidx.room'
 
 android {
     namespace 'ru.nsu.ccfit.zuev.osuplus'
-    compileSdk 34
-    ndkVersion '22.1.7171670'
+    compileSdk 36
+    ndkVersion '30.0.16248370'
 
     defaultConfig {
         minSdkVersion 24
