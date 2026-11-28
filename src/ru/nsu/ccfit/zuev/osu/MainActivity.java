@@ -42,6 +42,7 @@ import com.edlplan.ui.ActivityOverlay;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.osudroid.BuildSettings;
+import com.osudroid.FrameLimiterMode;
 import com.osudroid.beatmaplisting.BeatmapLink;
 import com.osudroid.beatmaplisting.BeatmapListing;
 import com.osudroid.beatmaps.BeatmapCache;
@@ -128,6 +129,12 @@ public class MainActivity extends BaseGameActivity implements
     private static final float MAXIMUM_UPDATE_HZ = 1000;
 
     private float currentRefreshRate = 60;
+
+    /**
+     * The frame limiter mode that was last applied to the render surface, or <code>null</code> if none was yet.
+     */
+    private FrameLimiterMode appliedFrameLimiterMode;
+
     private float maxRefreshRate = 60;
     private int maxRefreshRateModeId = 0;
     private MessageDialog multiWindowAlert;
@@ -434,6 +441,14 @@ public class MainActivity extends BaseGameActivity implements
         this.mRenderSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 24, 0);
         this.mRenderSurfaceView.getHolder().setFormat(PixelFormat.RGB_888);
         this.mRenderSurfaceView.setRenderer(this.mEngine);
+
+        if (BuildConfig.DEBUG && BuildSettings.DEBUG_FRAME_DELAY_INTERVAL > 0) {
+            this.mRenderSurfaceView.setDebugFrameDelay(
+                BuildSettings.DEBUG_FRAME_DELAY_INTERVAL,
+                BuildSettings.DEBUG_FRAME_DELAY_MS
+            );
+        }
+
         applyFrameLimiterSetting(Config.getFrameLimiter());
 
         RelativeLayout mainLayout = new RelativeLayout(this);
@@ -1170,21 +1185,39 @@ public class MainActivity extends BaseGameActivity implements
     }
 
     /**
+     * Sets whether the render surface measures when frames are presented.
+     * <p>
+     * This method is thread-safe.
+     */
+    public void setPresentedFrameTrackingEnabled(boolean enabled) {
+        if (mRenderSurfaceView != null) {
+            mRenderSurfaceView.setPresentedFrameTrackingEnabled(enabled);
+        }
+    }
+
+    /**
      * Applies a frame limiter setting to the render surface and the update clock.
      *
-     * @param frameLimiter A value returned by {@link Config#getFrameLimiter()}.
+     * @param mode The frame limiter mode to apply.
      */
-    public void applyFrameLimiterSetting(int frameLimiter) {
-        boolean lowLatency = frameLimiter == Config.FRAME_LIMITER_VSYNC_LOW_LATENCY;
-        boolean vsync = lowLatency || frameLimiter == Config.FRAME_LIMITER_VSYNC;
+    public void applyFrameLimiterSetting(FrameLimiterMode mode) {
+        boolean lowLatency = mode == FrameLimiterMode.VSyncLowLatency;
+        boolean vsync = mode.isVSync();
 
         // Every frame gets a presentation time, and with vertical sync on, a Choreographer callback paces the loop
         // instead of the swap interval. The next update only starts after that wait, so it samples input as late as
         // possible.
         if (mRenderSurfaceView != null) {
             mRenderSurfaceView.setVSyncEnabled(vsync);
-            mRenderSurfaceView.setPresentationTimeEnabled(frameLimiter != Config.FRAME_LIMITER_VSYNC);
+            mRenderSurfaceView.setPresentationTimeEnabled(mode != FrameLimiterMode.VSync);
             mRenderSurfaceView.setChoreographerPacingEnabled(lowLatency);
+
+            // Only a change of mode invalidates the measurements, not a refresh rate change that re-applies the same one.
+            if (appliedFrameLimiterMode != null && appliedFrameLimiterMode != mode) {
+                mRenderSurfaceView.resetPresentedFrameTracking();
+            }
+
+            appliedFrameLimiterMode = mode;
         }
 
         if (mEngine != null) {
@@ -1193,9 +1226,9 @@ public class MainActivity extends BaseGameActivity implements
 
         // With vertical sync on, the display paces the loop and the hard limit is never reached, which keeps the
         // previous behavior intact. Without it, the clock is the only thing pacing the loop.
-        float maximumUpdateHz = vsync || frameLimiter == Config.FRAME_LIMITER_UNLIMITED
-            ? MAXIMUM_UPDATE_HZ
-            : Math.min(currentRefreshRate * frameLimiter, MAXIMUM_UPDATE_HZ);
+        float maximumUpdateHz = mode.getRefreshRateMultiple() > 0
+            ? Math.min(currentRefreshRate * mode.getRefreshRateMultiple(), MAXIMUM_UPDATE_HZ)
+            : MAXIMUM_UPDATE_HZ;
 
         if (mEngine instanceof UIEngine uiEngine) {
             // The clock is read on the update thread, so change it there.

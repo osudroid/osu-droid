@@ -8,12 +8,15 @@ import com.reco1l.andengine.component.*
 import com.reco1l.andengine.ui.*
 import com.rian.andengine.HUD
 import com.rian.andengine.timing.IClockProvider
+import com.rian.andengine.timing.PresentedFrameClock
 import com.rian.andengine.timing.ThrottledFrameClock
 import org.anddev.andengine.engine.Engine
 import org.anddev.andengine.engine.options.EngineOptions
 import org.anddev.andengine.entity.IEntity
 import org.anddev.andengine.entity.scene.*
 import org.anddev.andengine.input.touch.*
+import org.anddev.andengine.opengl.view.PresentedFrameBatch
+import org.anddev.andengine.util.annotation.GLThread
 import javax.microedition.khronos.opengles.*
 import kotlin.math.*
 import org.anddev.andengine.engine.camera.Camera
@@ -21,6 +24,11 @@ import org.anddev.andengine.engine.camera.Camera
 class UIEngine(val context: Activity, options: EngineOptions) : Engine(options),
     IClockProvider<ThrottledFrameClock> {
     override val clock = ThrottledFrameClock()
+
+    /**
+     * Measures the rate at which frames are presented to the display.
+     */
+    val presentedClock = PresentedFrameClock()
 
     /**
      * The global HUD used for overlays (menus, dialogs, etc).
@@ -190,6 +198,19 @@ class UIEngine(val context: Activity, options: EngineOptions) : Engine(options),
         }
 
         return super.onTouchScene(scene, event)
+    }
+
+    @GLThread
+    override fun onPresentedFrames(pBatch: PresentedFrameBatch) {
+        if (pBatch.wasReset) {
+            presentedClock.reset()
+        }
+
+        for (i in 0 until pBatch.count) {
+            presentedClock.onFramePresented(pBatch.presentTimes[i])
+        }
+
+        presentedClock.isAvailable = pBatch.isAvailable
     }
 
     override fun onUpdate(pNanosecondsElapsed: Long) {

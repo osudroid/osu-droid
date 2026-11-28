@@ -24,7 +24,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ./gradlew lint
 ```
 
-Requires **Java 17** and **Android NDK 22.1.7171670**. The project has three Gradle modules: the main app, `:AndEngine` (modified GLES2 engine), and `:LibBASS` (native audio). Tests live under `tests/test/kotlin/` (not the standard `src/test/`).
+Requires **Java 17**, **Android NDK 22.1.7171670** and **CMake 3.22.1**. The project has three Gradle modules: the main app, `:AndEngine` (modified GLES2 engine), and `:LibBASS` (native audio). Tests live under `tests/test/kotlin/` (not the standard `src/test/`).
 
 ## Architecture Overview
 

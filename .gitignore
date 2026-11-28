@@ -36,7 +36,11 @@ proguard_logs/
 .DS_Store
 .gradle/
 .externalNativeBuild/
+.cxx/
 .kotlin/
+
+# clangd compilation database (machine-specific absolute paths)
+AndEngine/jni/compile_commands.json
 
 release.jks
 

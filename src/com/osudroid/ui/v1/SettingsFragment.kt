@@ -44,6 +44,7 @@ import com.edlplan.framework.easing.Easing
 import com.edlplan.ui.fragment.LoadingFragment
 import com.edlplan.ui.fragment.SettingsFragment
 import com.google.android.material.snackbar.Snackbar
+import com.osudroid.FrameLimiterMode
 import com.osudroid.UpdateManager
 import com.osudroid.data.DatabaseManager
 import com.osudroid.multiplayer.api.LobbyAPI
@@ -666,14 +667,17 @@ class SettingsFragment : SettingsFragment() {
 
 
     private fun handleGraphicsSectionPreferences() {
-        findPreference<SelectPreference>("frameLimiter")!!.setOnPreferenceChangeListener { _, newValue ->
-            val frameLimiter = Config.parseFrameLimiter(newValue.toString())
+        findPreference<SelectPreference>("frameLimiter")!!.apply {
 
-            // Store it right away: MainActivity re-applies the setting from Config whenever the display changes, and
-            // Config is otherwise only reloaded once the settings are dismissed.
-            Config.setFrameLimiter(frameLimiter)
-            (requireActivity() as MainActivity).applyFrameLimiterSetting(frameLimiter)
-            true
+            options = FrameLimiterMode.entries.mapTo(ArrayList()) { Option(getString(it.nameResId), it.value.toString()) }
+
+            setOnPreferenceChangeListener { _, newValue ->
+                val frameLimiter = FrameLimiterMode.parse(newValue.toString())
+
+                Config.setFrameLimiter(frameLimiter)
+                (requireActivity() as MainActivity).applyFrameLimiterSetting(frameLimiter)
+                true
+            }
         }
 
         findPreference<SelectPreference>("skinPath")!!.apply {
