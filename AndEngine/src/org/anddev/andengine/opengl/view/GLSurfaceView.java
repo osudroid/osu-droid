@@ -12,6 +12,7 @@
 package org.anddev.andengine.opengl.view;
 
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.concurrent.Semaphore;
 
 import javax.microedition.khronos.egl.EGL10;
@@ -23,6 +24,7 @@ import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL;
 import javax.microedition.khronos.opengles.GL10;
 
+import org.anddev.andengine.BuildConfig;
 import org.anddev.andengine.util.Debug;
 
 import android.content.Context;
@@ -223,6 +225,34 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 	 * Whether the GL thread waits for a {@link android.view.Choreographer} vertical sync callback after each swap.
 	 */
 	private volatile boolean mChoreographerPacingEnabled = false;
+	// END osu!droid modified
+
+	// BEGIN osu!droid modified: presented frame tracking
+	private final PresentedFrameTracker mPresentedFrameTracker = new PresentedFrameTracker(new NativeFrameTimestampSource(), System::nanoTime);
+
+	/**
+	 * The debug frame delay, which stalls every n-th frame. The interval is 0 when there is no delay.
+	 */
+	private volatile int mDebugFrameDelayInterval;
+	private volatile int mDebugFrameDelayMillis;
+
+	/**
+	 * The number of frames counted towards the debug frame delay interval.
+	 */
+	@org.anddev.andengine.util.annotation.GLThread
+	private int mDebugFrameDelayCounter;
+
+	/**
+	 * Receives the presented frame stats that are logged once per second in debug builds.
+	 */
+	@org.anddev.andengine.util.annotation.GLThread
+	private final PresentedFrameStats mPresentedFrameStats = new PresentedFrameStats();
+
+	/**
+	 * The time of the last presented frame stats check, in the {@link System#nanoTime()} time base.
+	 */
+	@org.anddev.andengine.util.annotation.GLThread
+	private long mLastPresentedFrameLogNanos;
 	// END osu!droid modified
 
 	// ===========================================================
@@ -481,6 +511,49 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 	}
 	// END osu!droid modified
 
+	// BEGIN osu!droid modified: presented frame tracking
+	/**
+	 * @return The tracker of the frames that reach the display.
+	 */
+	public PresentedFrameTracker getPresentedFrameTracker() {
+		return this.mPresentedFrameTracker;
+	}
+
+	/**
+	 * Sets whether the frames that reach the display are tracked.
+	 * <p>
+	 * This method is thread-safe. The change is applied by the GL thread on its next frame.
+	 */
+	public void setPresentedFrameTrackingEnabled(final boolean enabled) {
+		this.mPresentedFrameTracker.setEnabled(enabled);
+	}
+
+	/**
+	 * Makes presented frame tracking start over, which also retries after tracking gave up.
+	 * <p>
+	 * This method is thread-safe. The change is applied by the GL thread on its next frame.
+	 */
+	public void resetPresentedFrameTracking() {
+		this.mPresentedFrameTracker.reset();
+	}
+
+	/**
+	 * Makes the GL thread sleep before swapping every n-th frame, to test how presented frame tracking reacts to
+	 * dropped frames.
+	 * <p>
+	 * This is for debug builds only.
+	 * <p>
+	 * This method is thread-safe.
+	 *
+	 * @param everyNthFrame The interval between delayed frames. 0 disables the delay.
+	 * @param delayMillis   How long to sleep, in milliseconds. A negative value is treated as 0.
+	 */
+	public void setDebugFrameDelay(final int everyNthFrame, final int delayMillis) {
+		this.mDebugFrameDelayMillis = Math.max(0, delayMillis);
+		this.mDebugFrameDelayInterval = everyNthFrame;
+	}
+	// END osu!droid modified
+
 	// ===========================================================
 	// Methods for/from SuperClass/Interfaces
 	// ===========================================================
@@ -726,6 +799,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 					}
 					// END osu!droid modified
 
+					// BEGIN osu!droid modified: presented frame tracking
+					this.trackPresentedFrames();
+					// END osu!droid modified
+
 					this.mEglHelper.swap();
 
 					// BEGIN osu!droid modified: frame pacing controls
@@ -747,6 +824,48 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 			 */
 			this.mEglHelper.finish();
 		}
+
+		// BEGIN osu!droid modified: presented frame tracking
+		/**
+		 * Applies the debug frame delay, lets the tracker note the swap that follows, and logs the
+		 * tracking stats once per second in debug builds.
+		 */
+		@org.anddev.andengine.util.annotation.GLThread
+		private void trackPresentedFrames() throws InterruptedException {
+			final int delayInterval = GLSurfaceView.this.mDebugFrameDelayInterval;
+
+			if (delayInterval > 0 && ++GLSurfaceView.this.mDebugFrameDelayCounter % delayInterval == 0) {
+				Thread.sleep(GLSurfaceView.this.mDebugFrameDelayMillis);
+			}
+
+			final PresentedFrameTracker tracker = GLSurfaceView.this.mPresentedFrameTracker;
+
+			tracker.onBeforeSwap();
+
+			if (!BuildConfig.DEBUG) {
+				return;
+			}
+
+			final long now = System.nanoTime();
+
+			if (now - GLSurfaceView.this.mLastPresentedFrameLogNanos < 1_000_000_000L) {
+				return;
+			}
+
+			GLSurfaceView.this.mLastPresentedFrameLogNanos = now;
+
+			final PresentedFrameStats stats = GLSurfaceView.this.mPresentedFrameStats;
+			tracker.drainStatsInto(stats);
+
+			// Nothing is swapped while tracking is off, so there is nothing to log.
+			if (stats.swapped == 0) {
+				return;
+			}
+
+			Debug.d(String.format(Locale.ROOT, "PresentedFrames: swapped=%d presented=%d dropped=%d unknown=%d available=%b",
+				stats.swapped, stats.presented, stats.dropped, stats.unknown, tracker.isAvailable()));
+		}
+		// END osu!droid modified
 
 		private boolean needToWait() {
 			if(this.mDone) {
@@ -932,6 +1051,11 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 			 */
 			if(this.mEglSurface != null) {
 
+				// BEGIN osu!droid modified: presented frame tracking
+				// Tracking must stop before the surface it works on is destroyed.
+				GLSurfaceView.this.mPresentedFrameTracker.onSurfaceDestroyed();
+				// END osu!droid modified
+
 				/*
 				 * Unbind and destroy the old EGL surface, if there is one.
 				 */
@@ -958,6 +1082,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 
 			// A new native window starts out with automatic timestamps.
 			this.mHasPresentationTime = false;
+			// END osu!droid modified
+
+			// BEGIN osu!droid modified: presented frame tracking
+			GLSurfaceView.this.mPresentedFrameTracker.onSurfaceCreated();
 			// END osu!droid modified
 
 			GL gl = this.mEglContext.getGL();
@@ -1052,6 +1180,11 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 
 		public void finish() {
 			if(this.mEglSurface != null) {
+				// BEGIN osu!droid modified: presented frame tracking
+				// Tracking must stop before the surface it works on is destroyed.
+				GLSurfaceView.this.mPresentedFrameTracker.onSurfaceDestroyed();
+				// END osu!droid modified
+
 				this.mEgl.eglMakeCurrent(this.mEglDisplay, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
 				this.mEgl.eglDestroySurface(this.mEglDisplay, this.mEglSurface);
 				this.mEglSurface = null;

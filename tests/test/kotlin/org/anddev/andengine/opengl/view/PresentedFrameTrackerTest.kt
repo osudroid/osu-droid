@@ -56,6 +56,18 @@ class PresentedFrameTrackerTest {
     }
 
     @Test
+    fun `Availability is reported once a frame is presented`() {
+        enableAndSwap(2)
+
+        assertFalse(tracker.isAvailable)
+
+        source.results[1] = 100L
+        tracker.onBeforeSwap()
+
+        assertTrue(tracker.isAvailable)
+    }
+
+    @Test
     fun `Only an invalid present time counts as dropped`() {
         enableAndSwap(2)
         source.results[1] = FrameTimestampSource.RESULT_DROPPED

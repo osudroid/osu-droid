@@ -23,6 +23,8 @@ import org.anddev.andengine.opengl.font.FontManager;
 import org.anddev.andengine.opengl.texture.TextureManager;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
 import org.anddev.andengine.opengl.util.GLHelper;
+import org.anddev.andengine.opengl.view.PresentedFrameBatch;
+import org.anddev.andengine.opengl.view.PresentedFrameTracker;
 import org.anddev.andengine.sensor.SensorDelay;
 import org.anddev.andengine.sensor.accelerometer.AccelerometerData;
 import org.anddev.andengine.sensor.accelerometer.AccelerometerSensorOptions;
@@ -34,6 +36,7 @@ import org.anddev.andengine.sensor.orientation.IOrientationListener;
 import org.anddev.andengine.sensor.orientation.OrientationData;
 import org.anddev.andengine.sensor.orientation.OrientationSensorOptions;
 import org.anddev.andengine.util.Debug;
+import org.anddev.andengine.util.annotation.GLThread;
 import org.anddev.andengine.util.constants.TimeConstants;
 
 import android.annotation.SuppressLint;
@@ -94,6 +97,18 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 	 * Only accessed by the GL thread.
 	 */
 	private boolean mUpdateReleasePending = false;
+	// END osu!droid modified
+
+	// BEGIN osu!droid modified: presented frame tracking
+	/**
+	 * The tracker whose presented frames are handed to {@link #onPresentedFrames(PresentedFrameBatch)}.
+	 * <p>
+	 * Set before the GL thread starts drawing.
+	 */
+	private PresentedFrameTracker mPresentedFrameTracker;
+
+	@GLThread
+	private final PresentedFrameBatch mPresentedFrameBatch = new PresentedFrameBatch();
 	// END osu!droid modified
 
 	private final UpdateThread mUpdateThread = new UpdateThread();
@@ -525,6 +540,13 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 
 		threadLocker.waitUntilCanDraw();
 
+		// BEGIN osu!droid modified: presented frame tracking
+		if (this.mPresentedFrameTracker != null) {
+			this.mPresentedFrameTracker.drainInto(this.mPresentedFrameBatch);
+			this.onPresentedFrames(this.mPresentedFrameBatch);
+		}
+		// END osu!droid modified
+
 		this.mTextureManager.updateTextures(pGL);
 		this.mFontManager.updateFonts(pGL);
 		if(GLHelper.EXTENSIONS_VERTEXBUFFEROBJECTS) {
@@ -543,6 +565,24 @@ public class Engine implements SensorEventListener, OnTouchListener, ITouchEvent
 		}
 		// END osu!droid modified
 	}
+
+	// BEGIN osu!droid modified: presented frame tracking
+	/**
+	 * Sets the tracker whose presented frames are handed to {@link #onPresentedFrames(PresentedFrameBatch)}.
+	 */
+	public void setPresentedFrameTracker(final PresentedFrameTracker pTracker) {
+		this.mPresentedFrameTracker = pTracker;
+	}
+
+	/**
+	 * Called with the frames presented since the previous draw phase, while the update thread is held back.
+	 * <p>
+	 * Only called during the draw phase, and only if a tracker was set.
+	 */
+	@GLThread
+	protected void onPresentedFrames(final PresentedFrameBatch pBatch) {
+	}
+	// END osu!droid modified
 
 	// BEGIN osu!droid modified: optionally release the update thread after the buffer swap
 	public void onFrameSwapped(final GL10 pGL) {

@@ -197,6 +197,14 @@ public final class PresentedFrameTracker {
 	}
 
 	/**
+	 * Whether presented frames are being tracked and have been seen since tracking was last reset.
+	 */
+	@GLThread
+	boolean isAvailable() {
+		return this.mAvailable;
+	}
+
+	/**
 	 * Whether the source is running and its results are being collected.
 	 */
 	@GLThread
